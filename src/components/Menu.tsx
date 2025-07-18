@@ -1,6 +1,31 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { HiShoppingCart } from 'react-icons/hi'
+"use client";
+
+import { motion } from "framer-motion";
+import Image from 'next/image';
+import Link from 'next/link';
+import { HiShoppingCart } from 'react-icons/hi';
+
+const containerVariant = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const itemVariant = {
+  hidden: { y: -20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.7,
+      ease: "easeOut",
+    },
+  },
+};
 
 export default function Menu() {
   const menuItems = [
@@ -28,20 +53,34 @@ export default function Menu() {
       image: '/img/1685364484811.png',
       href: '/order/300gr'
     }
-  ]
+  ];
 
   return (
-    <section className="px-4 py-12 lg:px-24" id="menu">
-      <div className="text-center mb-8">
+    <motion.section
+      variants={containerVariant}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ amount: 0.3 }}
+      className="px-4 py-12 lg:px-24"
+      id="menu"
+    >
+      <motion.div
+        variants={itemVariant}
+        className="text-center mb-8"
+      >
         <span className="text-yellow-800 font-medium text-lg">Menu</span>
         <h2 className="text-2xl lg:text-4xl font-bold text-gray-800 mt-2">
           Variety of Options to Choose From
         </h2>
-      </div>
+      </motion.div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         {menuItems.map((item) => (
-          <div key={item.id} className="relative mt-8 bg-white rounded-lg shadow-md p-4 flex flex-col items-center">
+          <motion.div
+            key={item.id}
+            variants={itemVariant}
+            className="relative mt-8 bg-white rounded-lg shadow-md p-4 flex flex-col items-center"
+          >
             <div className="w-full mb-4">
               <Link href={item.href}>
                 <Image
@@ -59,9 +98,9 @@ export default function Menu() {
             <button className="absolute top-0 right-0 bg-yellow-800 hover:bg-yellow-700 text-white p-2 rounded-tl-none rounded-tr-lg rounded-bl-lg rounded-br-none transition-colors">
               <HiShoppingCart className="text-xl" />
             </button>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </section>
-  )
+    </motion.section>
+  );
 }

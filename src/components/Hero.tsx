@@ -1,33 +1,68 @@
-"use client"
+"use client";
+
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import Link from 'next/link';
 
+const containerVariant = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const itemVariant = {
+  hidden: { y: -20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.7,
+      ease: "easeOut",
+    },
+  },
+};
+
 export default function Hero() {
   return (
     <motion.section
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
+      variants={containerVariant}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ amount: 0.3 }}
       className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 items-center gap-6 px-4 py-12 lg:px-24"
       id="home"
     >
       <div className="space-y-4">
-        <h1 className="text-4xl lg:text-6xl font-semibold text-yellow-800 leading-tight">
-          Bali Pisang Sale
-        </h1>
-        <h2 className="text-xl lg:text-4xl text-gray-800 font-bold">
-          The #1 Leading Pisang <br /> Sale Producer in Bali
-        </h2>
-        <Link 
-          href="#menu" 
-          className="inline-block bg-yellow-800 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-lg transition-colors duration-200"
+        {/* 3. Apply the item variant to each child you want to animate */}
+        <motion.h1
+          variants={itemVariant}
+          className="text-4xl lg:text-6xl font-semibold text-yellow-800 leading-tight"
         >
-          View Menu
-        </Link>
+          Bali Pisang Sale
+        </motion.h1>
+        <motion.h2
+          variants={itemVariant}
+          className="text-xl lg:text-4xl text-gray-800 font-bold"
+        >
+          The #1 Leading Pisang <br /> Sale Producer in Bali
+        </motion.h2>
+        <motion.div variants={itemVariant}>
+          <Link
+            href="#menu"
+            className="inline-block bg-yellow-800 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-lg transition-colors duration-200"
+          >
+            View Menu
+          </Link>
+        </motion.div>
       </div>
-      <div className="flex justify-center lg:justify-end">
+      <motion.div
+        variants={itemVariant}
+        className="flex justify-center lg:justify-end"
+      >
         <Image
           src="/img/1685364484811.png"
           alt="Pisang Sale Product"
@@ -36,7 +71,7 @@ export default function Hero() {
           className="w-full max-w-xl"
           priority
         />
-      </div>
+      </motion.div>
     </motion.section>
   );
 }
