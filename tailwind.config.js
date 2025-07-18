@@ -1,14 +1,16 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
+  content: [
+    "./src/app/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
       colors: {
-        onyx: '#404040',
-        azure: '#3887FE',
-        // ...add your palette
-      },
-      fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        primary: '#5E3A16',
+        // add more custom colors here if needed
       },
     },
   },
-}
+  plugins: [],
+};
