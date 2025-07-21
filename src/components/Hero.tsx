@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import Image from 'next/image';
-import Link from 'next/link';
 
 const containerVariant = {
   hidden: { opacity: 0 },
@@ -27,6 +26,13 @@ const itemVariant = {
 };
 
 export default function Hero() {
+  const scrollToSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <motion.section
       variants={containerVariant}
@@ -51,12 +57,12 @@ export default function Hero() {
           The #1 Leading Pisang <br /> Sale Producer in Bali
         </motion.h2>
         <motion.div variants={itemVariant}>
-          <Link
-            href="#menu"
+          <button
+            onClick={() => scrollToSection('menu')}
             className="inline-block bg-yellow-800 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-lg transition-colors duration-200"
           >
             View Menu
-          </Link>
+          </button>
         </motion.div>
       </div>
       <motion.div

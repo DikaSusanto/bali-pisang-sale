@@ -73,7 +73,7 @@ export default function Menu() {
           Variety of Options to Choose From
         </h2>
       </motion.div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         {menuItems.map((item) => (
           <motion.div
@@ -82,7 +82,7 @@ export default function Menu() {
             className="relative mt-8 bg-white rounded-lg shadow-md p-4 flex flex-col items-center"
           >
             <div className="w-full mb-4">
-              <Link href={item.href}>
+              <Link href={`/order?product=${item.size}`}>
                 <Image
                   src={item.image}
                   alt={`${item.name} ${item.size}`}

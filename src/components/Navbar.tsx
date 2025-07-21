@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { HiMenu, HiX } from 'react-icons/hi'
 
 export default function Navbar() {
@@ -16,9 +15,17 @@ export default function Navbar() {
     setIsMenuOpen(false)
   }
 
+  const scrollToSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId)
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' })
+    }
+    closeMenu()
+  }
+
   return (
     <header className="fixed w-full top-0 right-0 z-50 flex items-center justify-between bg-white px-4 py-4 shadow-lg lg:px-24">
-      <Link href="#home" className="flex items-center">
+      <div className="flex items-center">
         <Image
           src="/img/logo sale.png"
           alt="Bali Pisang Sale Logo"
@@ -26,25 +33,40 @@ export default function Navbar() {
           height={100}
           className="w-20 lg:w-24"
         />
-      </Link>
+      </div>
 
       {/* Desktop Menu */}
       <nav className="hidden md:flex items-center space-x-8">
-        <Link href="#home" className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors">
+        <button
+          onClick={() => scrollToSection('home')}
+          className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors"
+        >
           Home
-        </Link>
-        <Link href="#about" className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors">
+        </button>
+        <button
+          onClick={() => scrollToSection('about')}
+          className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors"
+        >
           About
-        </Link>
-        <Link href="#menu" className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors">
+        </button>
+        <button
+          onClick={() => scrollToSection('menu')}
+          className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors"
+        >
           Menu
-        </Link>
-        <Link href="#services" className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors">
+        </button>
+        <button
+          onClick={() => scrollToSection('services')}
+          className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors"
+        >
           Service
-        </Link>
-        <Link href="#order" className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors">
+        </button>
+        <button
+          onClick={() => scrollToSection('order')}
+          className="text-gray-800 hover:text-yellow-800 font-medium px-5 py-2.5 transition-colors"
+        >
           Order
-        </Link>
+        </button>
       </nav>
 
       {/* Mobile Menu Button */}
@@ -56,25 +78,42 @@ export default function Navbar() {
       </button>
 
       {/* Mobile Menu */}
-      <nav className={`
-        md:hidden absolute left-0 right-0 flex flex-col text-center bg-white shadow-lg transition-all duration-200 ease-in-out
-        ${isMenuOpen ? 'top-full opacity-100' : 'top-[-495px] opacity-0'}
-      `}>
-        <Link href="#home" className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors" onClick={closeMenu}>
+      <nav
+        className={`
+          md:hidden absolute left-0 right-0 flex flex-col text-center bg-white shadow-lg transition-all duration-200 ease-in-out
+          ${isMenuOpen ? 'top-full opacity-100' : 'top-[-495px] opacity-0'}
+        `}
+      >
+        <button
+          onClick={() => scrollToSection('home')}
+          className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors"
+        >
           Home
-        </Link>
-        <Link href="#about" className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors" onClick={closeMenu}>
+        </button>
+        <button
+          onClick={() => scrollToSection('about')}
+          className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors"
+        >
           About
-        </Link>
-        <Link href="#menu" className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors" onClick={closeMenu}>
+        </button>
+        <button
+          onClick={() => scrollToSection('menu')}
+          className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors"
+        >
           Menu
-        </Link>
-        <Link href="#services" className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors" onClick={closeMenu}>
+        </button>
+        <button
+          onClick={() => scrollToSection('services')}
+          className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors"
+        >
           Service
-        </Link>
-        <Link href="#order" className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors" onClick={closeMenu}>
+        </button>
+        <button
+          onClick={() => scrollToSection('order')}
+          className="block py-6 px-4 bg-white text-gray-800 hover:text-yellow-800 font-medium transition-colors"
+        >
           Order
-        </Link>
+        </button>
       </nav>
     </header>
   )
