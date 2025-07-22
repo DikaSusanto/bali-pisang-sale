@@ -168,7 +168,7 @@ export default function Order() {
       className="bg-stone-50 px-4 py-16 lg:px-24"
     >
       <div className="container mx-auto">
-        <h1 className="text-4xl text-center font-bold text-yellow-800 mb-12">
+        <h1 className="text-4xl text-center font-bold text-primary mb-12">
           Checkout
         </h1>
 
@@ -275,7 +275,7 @@ export default function Order() {
                 </div>
 
                 {/* Submit Button */}
-                <button type="submit" disabled={isLoading} className="w-full mt-6 bg-yellow-800 hover:bg-yellow-700 text-white px-5 py-3 rounded-lg transition-all duration-200 font-bold text-lg disabled:bg-gray-400">
+                <button type="submit" disabled={isLoading} className="w-full mt-6 bg-primary hover:bg-yellow-800 text-white px-5 py-3 rounded-lg transition-all duration-200 font-bold text-lg disabled:bg-gray-400">
                   {isLoading ? "Processing..." : "Proceed to Payment"}
                 </button>
               </div>

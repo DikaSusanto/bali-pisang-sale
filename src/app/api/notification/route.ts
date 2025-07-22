@@ -26,6 +26,11 @@ export async function POST(request: Request) {
         where: { id: order_id },
         data: { status: 'PAID' },
       });
+    } else if (transaction_status === 'expire' || transaction_status === 'deny' || transaction_status === 'cancel') {
+      await prisma.order.update({
+        where: { id: order_id },
+        data: { status: 'CANCELLED' },
+      });
     }
 
     return NextResponse.json({ status: "ok" });

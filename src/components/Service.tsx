@@ -28,20 +28,20 @@ export default function Services() {
   const services = [
     {
       id: 1,
-      icon: <HiCube className="text-8xl text-yellow-800" />,
+      icon: <HiCube className="text-8xl text-primary" />,
       title: 'You Order',
       description: 'Order now by contacting us through our socials!',
     },
     {
       id: 2,
-      icon: <HiTruck className="text-8xl text-yellow-800" />,
+      icon: <HiTruck className="text-8xl text-primary" />,
       title: 'Shipping',
       description:
         'Products safely shipped to your house or any specified location',
     },
     {
       id: 3,
-      icon: <HiBadgeCheck className="text-8xl text-yellow-800" />,
+      icon: <HiBadgeCheck className="text-8xl text-primary" />,
       title: 'Delivered',
       description: 'We guarantee our products are safely delivered',
     },
@@ -57,7 +57,7 @@ export default function Services() {
       id="services"
     >
       <motion.div variants={itemVariant} className="text-center mb-8">
-        <span className="text-yellow-800 font-medium text-lg">Services</span>
+        <span className="text-primary font-medium text-lg">Services</span>
         <h2 className="text-2xl lg:text-4xl font-bold text-gray-800 mt-2">
           We provide best food services
         </h2>

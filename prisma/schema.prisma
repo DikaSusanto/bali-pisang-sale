@@ -13,6 +13,14 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  SHIPPED
+  CANCELLED
+}
+
 model OrderItem {
   id        String   @id @default(cuid())
   order     Order    @relation(fields: [orderId], references: [id])
@@ -26,7 +34,7 @@ model OrderItem {
 model Order {
   id            String       @id @default(cuid())
   totalAmount   Int
-  status        String       @default("PENDING")
+  status        OrderStatus @default(PENDING)
   customerName  String
   customerEmail String
   createdAt     DateTime     @default(now())

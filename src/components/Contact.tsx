@@ -42,13 +42,13 @@ export default function Contact() {
         <div className="flex space-x-4 mt-6">
           <Link
             href="https://www.facebook.com/bali.pisangsale"
-            className="text-gray-800 hover:text-yellow-800 transition-colors"
+            className="text-gray-800 hover:text-primary transition-colors"
           >
             <FaFacebook className="text-xl" />
           </Link>
           <Link
             href="https://www.instagram.com/bali_pisang/"
-            className="text-gray-800 hover:text-yellow-800 transition-colors"
+            className="text-gray-800 hover:text-primary transition-colors"
           >
             <FaInstagram className="text-xl" />
           </Link>

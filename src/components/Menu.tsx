@@ -68,7 +68,7 @@ export default function Menu() {
         variants={itemVariant}
         className="text-center mb-8"
       >
-        <span className="text-yellow-800 font-medium text-lg">Menu</span>
+        <span className="text-primary font-medium text-lg">Menu</span>
         <h2 className="text-2xl lg:text-4xl font-bold text-gray-800 mt-2">
           Variety of Options to Choose From
         </h2>
@@ -95,7 +95,7 @@ export default function Menu() {
             <h2 className="text-xl font-bold text-gray-800 mb-1">{item.name}</h2>
             <h3 className="text-base font-normal text-gray-600 mb-2">{item.size}</h3>
             <span className="text-sm font-medium text-gray-800 mb-4">{item.price}</span>
-            <button className="absolute top-0 right-0 bg-yellow-800 hover:bg-yellow-700 text-white p-2 rounded-tl-none rounded-tr-lg rounded-bl-lg rounded-br-none transition-colors">
+            <button className="absolute top-0 right-0 bg-primary hover:bg-yellow-800 text-white p-2 rounded-tl-none rounded-tr-lg rounded-bl-lg rounded-br-none transition-colors">
               <HiShoppingCart className="text-xl" />
             </button>
           </motion.div>

@@ -46,7 +46,7 @@ export default function Hero() {
         {/* 3. Apply the item variant to each child you want to animate */}
         <motion.h1
           variants={itemVariant}
-          className="text-4xl lg:text-6xl font-semibold text-yellow-800 leading-tight"
+          className="text-4xl lg:text-6xl font-semibold text-primary leading-tight"
         >
           Bali Pisang Sale
         </motion.h1>
@@ -59,7 +59,7 @@ export default function Hero() {
         <motion.div variants={itemVariant}>
           <button
             onClick={() => scrollToSection('menu')}
-            className="inline-block bg-yellow-800 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-lg transition-colors duration-200"
+            className="inline-block bg-primary hover:bg-yellow-800 text-white px-5 py-2.5 rounded-lg transition-colors duration-200"
           >
             View Menu
           </button>
