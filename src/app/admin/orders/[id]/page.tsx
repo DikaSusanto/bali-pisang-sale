@@ -6,7 +6,6 @@ import { Order, OrderItem, OrderStatus } from "@prisma/client";
 import Link from "next/link";
 import ConfirmationModal from "@/components/ConfirmationModal";
 
-// ✨ 1. Define the same transition logic on the frontend
 const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING: [OrderStatus.PAID, OrderStatus.CANCELLED],
   PAID: [OrderStatus.FULFILLED, OrderStatus.CANCELLED],
@@ -15,7 +14,19 @@ const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   CANCELLED: [],
 };
 
-type OrderWithItems = Order & { items: OrderItem[] };
+type OrderWithItems = Order & { 
+  items: OrderItem[];
+  subtotal: number;
+  serviceFee: number;
+};
+
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+    }).format(amount);
+};
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -24,8 +35,6 @@ export default function OrderDetailPage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newStatusToConfirm, setNewStatusToConfirm] = useState<OrderStatus | null>(null);
-
-  // ... useEffect and other handlers remain the same ...
 
   useEffect(() => {
     if (!id) return;
@@ -52,28 +61,22 @@ export default function OrderDetailPage() {
 
   const confirmStatusUpdate = async () => {
     if (!order || !newStatusToConfirm) return;
-
     setIsUpdating(true);
     setIsModalOpen(false);
-
     try {
       const response = await fetch(`/api/orders/${order.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatusToConfirm }),
       });
-
-      // Handle potential errors from the backend validation
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update status");
       }
-      
       const updatedOrder = await response.json();
       setOrder(updatedOrder);
     } catch (error) {
       console.error("Failed to update status:", error);
-      // Here you could show an error toast to the user
     } finally {
       setIsUpdating(false);
       setNewStatusToConfirm(null);
@@ -88,12 +91,7 @@ export default function OrderDetailPage() {
   if (isLoading) return <p className="text-center">Loading order details...</p>;
   if (!order) return <p className="text-center">Order not found.</p>;
 
-  // ✨ 2. Determine the available statuses for the dropdown
-  const availableStatuses = [
-    order.status, // Always include the current status
-    ...(validTransitions[order.status] || [])
-  ];
-  // Use a Set to remove duplicates in case a status can transition to itself
+  const availableStatuses = [order.status, ...(validTransitions[order.status] || [])];
   const uniqueAvailableStatuses = Array.from(new Set(availableStatuses));
 
   return (
@@ -103,28 +101,42 @@ export default function OrderDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="lg:col-span-1 space-y-6">
-            {/* ... Customer Details Card ... */}
+            {/* Customer Details Card */}
             <div className="bg-white p-6 rounded-xl shadow-md">
               <h2 className="text-xl font-bold mb-4">Customer Details</h2>
               <p><strong>Name:</strong> {order.customerName}</p>
               <p><strong>Email:</strong> {order.customerEmail}</p>
+              <p><strong>Phone:</strong> {order.customerPhone}</p>
             </div>
+            
             {/* Order Summary Card */}
             <div className="bg-white p-6 rounded-xl shadow-md">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              <p><strong>Order ID:</strong> <span className="text-sm font-mono">{order.id}</span></p>
-              <p><strong>Total:</strong> <span className="font-bold">{new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(order.totalAmount)}</span></p>
-              <div className="mt-4">
+              <div className="space-y-2 text-gray-700">
+                <p><strong>Order ID:</strong> <span className="text-sm font-mono">{order.id}</span></p>
+                <div className="flex justify-between">
+                  <span>Subtotal:</span>
+                  <span>{formatCurrency(order.subtotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Service Fee:</span>
+                  <span>{formatCurrency(order.serviceFee)}</span>
+                </div>
+                <div className="flex justify-between font-bold pt-2 border-t mt-2">
+                  <span>Grand Total:</span>
+                  <span>{formatCurrency(order.totalAmount)}</span>
+                </div>
+              </div>
+
+              <div className="mt-6">
                 <label htmlFor="status" className="block font-medium mb-2">Update Status:</label>
                 <select
                   id="status"
                   value={order.status}
                   onChange={handleStatusChange}
-                  // Disable if there are no valid next steps
                   disabled={isUpdating || validTransitions[order.status].length === 0}
                   className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
-                  {/* ✨ 3. Map over the dynamically generated list of statuses */}
                   {uniqueAvailableStatuses.map(status => (
                     <option key={status} value={status}>{status}</option>
                   ))}
@@ -135,7 +147,8 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </div>
-          {/* ... Right Column (Items) ... */}
+          
+          {/* Right Column (Items) */}
           <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
             <h2 className="text-xl font-bold mb-4">Items in Order</h2>
             <div className="space-y-4">
@@ -144,11 +157,11 @@ export default function OrderDetailPage() {
                   <div>
                     <p className="font-semibold">{item.name}</p>
                     <p className="text-sm text-gray-600">
-                      {item.quantity} x {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(item.price)}
+                      {item.quantity} x {formatCurrency(item.price)}
                     </p>
                   </div>
                   <p className="font-semibold">
-                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(item.quantity * item.price)}
+                    {formatCurrency(item.quantity * item.price)}
                   </p>
                 </div>
               ))}
@@ -156,7 +169,8 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
-      {/* ... Confirmation Modal ... */}
+      
+      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={isModalOpen}
         onClose={cancelStatusUpdate}

@@ -1,66 +1,59 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Order, OrderItem } from "@prisma/client";
 
-// Define a type for the combined Order and OrderItem data
 type OrderWithItems = Order & { items: OrderItem[] };
 
 function SuccessContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderWithItems | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const orderId = searchParams.get("order_id");
-    const transactionStatus = searchParams.get("transaction_status");
+    // ✨ 1. Read the secure token from the URL, not the order_id
+    const token = searchParams.get("token");
 
-    if (!orderId) {
-      setError("Order ID is missing.");
-      setIsLoading(false);
+    // We no longer need to check transaction_status here, as the token is our proof.
+    // The final status update will be handled by the server-to-server webhook.
+
+    if (!token) {
+      // Redirect if the token is missing
+      router.push(`/order/failed?code=MISSING_ID`); // Or a new 'MISSING_TOKEN' code
       return;
-    }
-    
-    // Optional: Check if the transaction was successful
-    if (transactionStatus !== 'settlement' && transactionStatus !== 'capture') {
-        setError("Payment was not successful. Please contact support.");
-        setIsLoading(false);
-        return;
     }
 
     const fetchOrder = async () => {
       try {
-        const response = await fetch(`/api/orders/${orderId}`);
+        // ✨ 2. Call the new, secure API endpoint with the token
+        const response = await fetch(`/api/orders/by-token/${token}`);
+        
         if (!response.ok) {
-          throw new Error("Could not find your order.");
+          // This will happen if the token is invalid or already used
+          throw new Error("ORDER_NOT_FOUND");
         }
+        
         const data = await response.json();
         setOrder(data);
       } catch (err: any) {
-        setError(err.message);
+        // ✨ 3. Redirect on any error
+        router.push(`/order/failed?code=${err.message || 'UNKNOWN_ERROR'}`);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchOrder();
-  }, [searchParams]);
+  }, [searchParams, router]);
 
-  if (isLoading) {
+  if (isLoading || !order) {
     return <p className="text-center text-lg">Verifying your order...</p>;
   }
 
-  if (error) {
-    return <p className="text-center text-red-600 text-lg">{error}</p>;
-  }
-
-  if (!order) {
-    return <p className="text-center text-lg">Order details could not be loaded.</p>;
-  }
-
+  // The rest of your success UI remains the same
   return (
     <div className="bg-white p-8 md:p-12 rounded-xl shadow-lg max-w-2xl mx-auto">
       <div className="text-center">
@@ -92,10 +85,10 @@ function SuccessContent() {
           <p>{new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(order.totalAmount)}</p>
         </div>
       </div>
-      
+
       <div className="text-center mt-10">
         <Link href="/" className="bg-primary text-white font-bold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity">
-            → Back to Homepage
+          → Back to Homepage
         </Link>
       </div>
     </div>
@@ -103,13 +96,13 @@ function SuccessContent() {
 }
 
 
-// We wrap the main component in Suspense because useSearchParams() requires it.
+// The wrapper component remains the same
 export default function SuccessPage() {
-    return (
-        <div className="container mx-auto px-4 py-12">
-            <Suspense fallback={<p className="text-center text-lg">Loading...</p>}>
-                <SuccessContent />
-            </Suspense>
-        </div>
-    )
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <Suspense fallback={<p className="text-center text-lg">Loading...</p>}>
+        <SuccessContent />
+      </Suspense>
+    </div>
+  )
 }

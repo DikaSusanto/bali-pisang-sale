@@ -15,27 +15,52 @@ const statusColors: Record<OrderStatus, string> = {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!isLoading) {
+        setIsRefreshing(true);
+      }
       try {
         const response = await fetch("/api/orders");
         const data = await response.json();
         setOrders(data);
+        setLastUpdated(new Date());
       } catch (error) {
         console.error("Failed to fetch orders:", error);
       } finally {
         setIsLoading(false);
+        setIsRefreshing(false);
       }
     };
+
     fetchOrders();
+
+    const intervalId = setInterval(fetchOrders, 30000); 
+    return () => clearInterval(intervalId);
   }, []);
 
   if (isLoading) return <p className="text-center">Loading orders...</p>;
 
   return (
     <div className="container mx-auto px-4 lg:px-24">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">All Orders</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">All Orders</h1>
+        <div className="text-sm text-gray-500 text-right">
+          {isRefreshing ? (
+            <span>Refreshing...</span>
+          ) : (
+            lastUpdated && (
+              <span>
+                Last updated: {lastUpdated.toLocaleTimeString()}
+              </span>
+            )
+          )}
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <table className="min-w-full text-left">
           <thead className="border-b bg-stone-50">

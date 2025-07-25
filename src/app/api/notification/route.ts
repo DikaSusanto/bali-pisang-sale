@@ -8,17 +8,14 @@ export async function POST(request: Request) {
   try {
     const notificationJson = await request.json();
 
-    // 1. Create a signature key hash for verification
     const signatureKey = crypto.createHash('sha512')
       .update(`${notificationJson.order_id}${notificationJson.status_code}${notificationJson.gross_amount}${process.env.MIDTRANS_SERVER_KEY}`)
       .digest('hex');
 
-    // 2. Verify the notification is genuinely from Midtrans
     if (notificationJson.signature_key !== signatureKey) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
     }
 
-    // 3. Safely update your database
     const { order_id, transaction_status } = notificationJson;
 
     if (transaction_status === 'capture' || transaction_status === 'settlement') {

@@ -35,7 +35,6 @@ export default function Menu() {
       size: '250 gr',
       price: 'IDR 45K',
       image: '/img/1685364484811.png',
-      href: '/order/250gr'
     },
     {
       id: 2,
@@ -43,7 +42,6 @@ export default function Menu() {
       size: '100 gr',
       price: 'IDR 15K',
       image: '/img/1685364484811.png',
-      href: '/order/100gr'
     },
     {
       id: 3,
@@ -51,7 +49,6 @@ export default function Menu() {
       size: '300 gr',
       price: 'IDR 55K',
       image: '/img/1685364484811.png',
-      href: '/order/300gr'
     }
   ];
 
@@ -82,7 +79,7 @@ export default function Menu() {
             className="relative mt-8 bg-white rounded-lg shadow-md p-4 flex flex-col items-center"
           >
             <div className="w-full mb-4">
-              <Link href={`/order?product=${item.size}`}>
+              <Link href={`/order`}>
                 <Image
                   src={item.image}
                   alt={`${item.name} ${item.size}`}
