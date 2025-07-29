@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Order, OrderItem, OrderStatus } from "@prisma/client";
 import Link from "next/link";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING: [OrderStatus.PAID, OrderStatus.CANCELLED],
@@ -14,18 +15,18 @@ const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   CANCELLED: [],
 };
 
-type OrderWithItems = Order & { 
+type OrderWithItems = Order & {
   items: OrderItem[];
   subtotal: number;
   serviceFee: number;
 };
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        minimumFractionDigits: 0,
-    }).format(amount);
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(amount);
 };
 
 export default function OrderDetailPage() {
@@ -88,11 +89,19 @@ export default function OrderDetailPage() {
     setNewStatusToConfirm(null);
   };
 
-  if (isLoading) return <p className="text-center">Loading order details...</p>;
+  if (isLoading) return <LoadingSpinner text="Loading order details..." />;
   if (!order) return <p className="text-center">Order not found.</p>;
 
   const availableStatuses = [order.status, ...(validTransitions[order.status] || [])];
   const uniqueAvailableStatuses = Array.from(new Set(availableStatuses));
+  const isFinalStatus = newStatusToConfirm === "SHIPPED" || newStatusToConfirm === "CANCELLED";
+  const finalStatusWarning = isFinalStatus ? (
+    <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-3 mb-3 rounded">
+      <strong>Warning:</strong> Once you set the status to <span className="font-bold">{newStatusToConfirm}</span>, this order will be locked and cannot be changed anymore.
+      <br />
+      Please make sure you really want to proceed.
+    </div>
+  ) : null;
 
   return (
     <>
@@ -107,8 +116,9 @@ export default function OrderDetailPage() {
               <p><strong>Name:</strong> {order.customerName}</p>
               <p><strong>Email:</strong> {order.customerEmail}</p>
               <p><strong>Phone:</strong> {order.customerPhone}</p>
+              <p><strong>Address:</strong> {order.customerAddress}</p>
             </div>
-            
+
             {/* Order Summary Card */}
             <div className="bg-white p-6 rounded-xl shadow-md">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
@@ -147,7 +157,7 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Right Column (Items) */}
           <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
             <h2 className="text-xl font-bold mb-4">Items in Order</h2>
@@ -169,7 +179,7 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
-      
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={isModalOpen}
@@ -178,6 +188,7 @@ export default function OrderDetailPage() {
         isConfirming={isUpdating}
         title="Confirm Status Change"
       >
+        {finalStatusWarning}
         <p>
           Are you sure you want to change the order status from{' '}
           <strong className="font-semibold text-gray-800">{order.status}</strong> to{' '}

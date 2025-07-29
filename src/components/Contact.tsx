@@ -43,12 +43,14 @@ export default function Contact() {
           <Link
             href="https://www.facebook.com/bali.pisangsale"
             className="text-gray-800 hover:text-primary transition-colors"
+            target="_blank"
           >
             <FaFacebook className="text-xl" />
           </Link>
           <Link
             href="https://www.instagram.com/bali_pisang/"
             className="text-gray-800 hover:text-primary transition-colors"
+            target="_blank"
           >
             <FaInstagram className="text-xl" />
           </Link>

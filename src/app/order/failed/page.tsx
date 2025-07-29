@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ErrorDisplay from "@/components/ErrorDisplay";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // A map of error codes to display messages
 const errorMessages: Record<string, string> = {
@@ -23,7 +24,7 @@ function FailedContent() {
 export default function FailedPage() {
   return (
     <div className="container mx-auto px-4 py-12">
-      <Suspense fallback={<p className="text-center text-lg">Loading...</p>}>
+      <Suspense fallback={<LoadingSpinner text="Loading..." />}>
         <FailedContent />
       </Suspense>
     </div>

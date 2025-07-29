@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
+import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
-const prisma = new PrismaClient();
-
-// ✨ 1. Define the valid transitions on the backend as well
 const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING: [OrderStatus.PAID, OrderStatus.CANCELLED],
   PAID: [OrderStatus.FULFILLED, OrderStatus.CANCELLED],
@@ -12,11 +12,16 @@ const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   CANCELLED: [],
 };
 
-// ... GET handler remains the same ...
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // ✨ Check for a valid admin session
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const order = await prisma.order.findUniqueOrThrow({
@@ -31,17 +36,20 @@ export async function GET(
   }
 }
 
-
-// PATCH handler to update the order status
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // ✨ Check for a valid admin session
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { status: newStatus }: { status: OrderStatus } = await request.json();
     const { id } = await params;
 
-    // ✨ 2. Fetch the current order to check its status
     const currentOrder = await prisma.order.findUnique({
       where: { id: id },
     });
@@ -50,16 +58,14 @@ export async function PATCH(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // ✨ 3. Validate the transition
     const allowedTransitions = validTransitions[currentOrder.status];
     if (!allowedTransitions.includes(newStatus)) {
       return NextResponse.json(
         { error: `Invalid status transition from ${currentOrder.status} to ${newStatus}` },
-        { status: 400 } // Bad Request
+        { status: 400 }
       );
     }
-    
-    // ✨ 4. If valid, proceed with the update
+
     const updatedOrder = await prisma.order.update({
       where: { id: id },
       data: { status: newStatus },

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { FaPlus, FaMinus, FaTrash, FaInfoCircle } from "react-icons/fa";
+import Link from "next/link";
 
 // --- Interfaces and Data ---
 interface Product {
@@ -40,6 +41,7 @@ export default function Order() {
     lastName: "",
     email: "",
     phone: "",
+    address: "",
   });
 
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -49,6 +51,7 @@ export default function Order() {
     lastName: "",
     email: "",
     phone: "",
+    address: "",
   });
 
   const subtotal = cart.reduce((total, item) => {
@@ -92,12 +95,13 @@ export default function Order() {
   const handleRemoveItem = (productId: string) => { setCart((prevCart) => prevCart.filter((item) => item.productId !== productId)) };
 
   const validateForm = () => {
-    const newErrors = { firstName: "", lastName: "", email: "", phone: "" };
+    const newErrors = { firstName: "", lastName: "", email: "", phone: "", address: "" };
     let isValid = true;
 
     if (!customer.firstName.trim()) { newErrors.firstName = "First name is required."; isValid = false; }
     if (!customer.lastName.trim()) { newErrors.lastName = "Last name is required."; isValid = false; }
     if (!customer.email.trim()) { newErrors.email = "Email is required."; isValid = false; }
+    if (!customer.address.trim()) { newErrors.address = "Address is required."; isValid = false; }
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) { newErrors.email = "Please enter a valid email address."; isValid = false; }
     if (!customer.phone.trim()) { newErrors.phone = "Phone number is required."; isValid = false; }
 
@@ -156,9 +160,10 @@ export default function Order() {
     >
       <div className="container mx-auto">
         <h1 className="text-4xl text-center font-bold text-primary mb-12">Checkout</h1>
+        <Link href="/" className="text-primary hover:underline mb-6 block">&larr; Back to Home Page</Link>
 
         <form onSubmit={handleOrderSubmit} noValidate className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* --- Column 1: Customer Details (No Changes Here) --- */}
+          {/* --- Column 1: Customer Details --- */}
           <div className="lg:col-span-2 bg-white p-8 rounded-xl shadow-md">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Customer Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -176,6 +181,11 @@ export default function Order() {
                 <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
                 <input type="email" id="email" name="email" value={customer.email} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" />
                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              </div>
+              <div className="md:col-span-2">
+                <label htmlFor="address" className="block text-gray-700 font-medium mb-2">Address</label>
+                <input type="text" id="address" name="address" value={customer.address} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" placeholder="e.g., Jalan Semarang" />
+                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
               </div>
               <div className="md:col-span-2">
                 <label htmlFor="phone" className="block text-gray-700 font-medium mb-2">Phone Number</label>
@@ -237,7 +247,7 @@ export default function Order() {
               )}
             </div>
 
-            {/* --- Updated Order Summary Section --- */}
+            {/* --- Order Summary Section --- */}
             {cart.length > 0 && (
               <div className="mt-6 pt-6 border-t space-y-2 text-gray-700">
                 <div className="flex justify-between">

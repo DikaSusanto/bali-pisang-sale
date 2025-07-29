@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Order from "@/components/Order";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function OrderPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -14,9 +15,7 @@ export default function OrderPage() {
   return (
     <main className="min-h-screen">
       {isLoading ? (
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-yellow-800"></div>
-        </div>
+        <LoadingSpinner /> 
       ) : (
         <Order />
       )}

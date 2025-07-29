@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import midtransClient from "midtrans-client";
-import { PrismaClient } from '@prisma/client';
+import prisma from "@/lib/prisma";
 import crypto from 'crypto';
 
-const prisma = new PrismaClient();
 const snap = new midtransClient.Snap({
   isProduction: false,
   serverKey: process.env.MIDTRANS_SERVER_KEY,
@@ -42,6 +41,7 @@ export async function POST(request: Request) {
         customerName: `${customer.firstName} ${customer.lastName}`,
         customerEmail: customer.email,
         customerPhone: customer.phone,
+        customerAddress: customer.address,
         paymentToken: paymentToken,
         items: {
           create: items.map((item: any) => ({
@@ -81,6 +81,7 @@ export async function POST(request: Request) {
         last_name: customer.lastName,
         email: customer.email,
         phone: customer.phone,
+        address: customer.address,
       },
       callbacks: {
         finish: `${process.env.NEXT_PUBLIC_BASE_URL}/order/success?token=${paymentToken}`,

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Order, OrderItem } from "@prisma/client";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 type OrderWithItems = Order & { items: OrderItem[] };
 
@@ -50,7 +51,7 @@ function SuccessContent() {
   }, [searchParams, router]);
 
   if (isLoading || !order) {
-    return <p className="text-center text-lg">Verifying your order...</p>;
+    return <LoadingSpinner text="Verifying your order..."/>;
   }
 
   // The rest of your success UI remains the same
@@ -100,7 +101,7 @@ function SuccessContent() {
 export default function SuccessPage() {
   return (
     <div className="container mx-auto px-4 py-12">
-      <Suspense fallback={<p className="text-center text-lg">Loading...</p>}>
+      <Suspense fallback={<LoadingSpinner text="Loading..." />}>
         <SuccessContent />
       </Suspense>
     </div>
