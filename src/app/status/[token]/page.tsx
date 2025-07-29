@@ -1,18 +1,8 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Order, OrderItem, OrderStatus } from "@prisma/client";
+import prisma from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import { OrderStatus } from "@prisma/client";
 import { FaCheckCircle, FaTimesCircle, FaSpinner, FaBox, FaTruck } from 'react-icons/fa';
-import LoadingSpinner from "@/components/LoadingSpinner";
-
-// --- Type Definition ---
-type OrderWithItems = Order & {
-  items: OrderItem[];
-  subtotal: number;
-  serviceFee: number;
-};
 
 // --- Helper Components & Data ---
 const formatCurrency = (amount: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
@@ -25,63 +15,25 @@ const statusInfo: Record<OrderStatus, { text: string; color: string; icon: React
   CANCELLED: { text: "Order Cancelled", color: "text-red-600", icon: <FaTimesCircle /> },
 };
 
-// --- Main Page Component ---
-export default function OrderStatusPage() {
-  const { token } = useParams();
-  const [order, setOrder] = useState<OrderWithItems | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!token || typeof token !== 'string') {
-      setError("Invalid token.");
-      setIsLoading(false);
-      return;
-    }
+// This is now an async Server Component that receives params
+export default async function OrderStatusPage({ params }: { params: { token: string } }) {
+  const { token } = await params;
 
-    const fetchOrder = async () => {
-      try {
-        const response = await fetch(`/api/orders/by-token/${token}`);
-        if (!response.ok) {
-          throw new Error("Order not found.");
-        }
-        const data = await response.json();
-        setOrder(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // 1. Fetch the order directly from the database on the server
+  const order = await prisma.order.findUnique({
+    where: { paymentToken: token },
+    include: { items: true },
+  });
 
-    fetchOrder();
-  }, [token]);
-
-  if (isLoading) {
-    return (
-      <LoadingSpinner text="Loading order status..." />
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col justify-center items-center min-h-screen bg-stone-50 text-center px-4">
-        <FaTimesCircle className="text-5xl text-red-500 mb-4" />
-        <h1 className="text-2xl font-bold text-gray-800">Failed to Load Order</h1>
-        <p className="text-gray-600 mt-2">{error}</p>
-        <Link href="/" className="mt-6 bg-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-800">
-          Return to Homepage
-        </Link>
-      </div>
-    );
-  }
-
+  // 2. If the order is not found, render the 404 page
   if (!order) {
-    return null; // Should be covered by error state, but as a fallback.
+    notFound();
   }
 
   const currentStatus = statusInfo[order.status];
 
+  // 3. If the order is found, render the UI directly
   return (
     <div className="bg-stone-50 min-h-screen py-12 px-4">
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
@@ -93,13 +45,19 @@ export default function OrderStatusPage() {
           <p className="text-gray-600 mt-2">Thank you for your order, {order.customerName.split(' ')[0]}.</p>
         </div>
         
-        {/* Order Details */}
         <div className="border-t border-b py-4 space-y-2">
           <div className="flex justify-between"><span className="text-gray-600">Order ID:</span><span className="font-mono text-sm">{order.id}</span></div>
-          <div className="flex justify-between"><span className="text-gray-600">Date:</span><span>{new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Date:</span>
+            <span>
+              {/* Corrected date formatting to prevent hydration errors */}
+              {new Date(order.createdAt).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Makassar'
+              })}
+            </span>
+          </div>
         </div>
 
-        {/* Items */}
         <div className="my-6">
           <h3 className="font-bold text-lg mb-4">Order Details</h3>
           <div className="space-y-4">
@@ -115,7 +73,6 @@ export default function OrderStatusPage() {
           </div>
         </div>
 
-        {/* Financials */}
         <div className="border-t pt-4 space-y-2">
           <div className="flex justify-between text-gray-700"><span>Subtotal:</span><span>{formatCurrency(order.subtotal)}</span></div>
           <div className="flex justify-between text-gray-700"><span>Service Fee:</span><span>{formatCurrency(order.serviceFee)}</span></div>

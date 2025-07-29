@@ -26,6 +26,13 @@ const itemVariant = {
   },
 };
 
+const scrollToSection = (sectionId: string) => {
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
 export default function Contact() {
   return (
     <motion.section
@@ -62,44 +69,49 @@ export default function Contact() {
         <h3 className="text-xl font-bold text-gray-800 mb-4">Menu Links</h3>
         <ul className="space-y-2">
           <li>
-            <Link
-              href="#home"
-              className="text-gray-800 hover:text-yellow-800 transition-colors"
+            <button
+              type="button"
+              onClick={() => scrollToSection('home')}
+              className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
               Home
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              href="#about"
-              className="text-gray-800 hover:text-yellow-800 transition-colors"
+            <button
+              type="button"
+              onClick={() => scrollToSection('about')}
+              className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
               About
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              href="#menu"
-              className="text-gray-800 hover:text-yellow-800 transition-colors"
+            <button
+              type="button"
+              onClick={() => scrollToSection('menu')}
+              className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
               Menu
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              href="#services"
-              className="text-gray-800 hover:text-yellow-800 transition-colors"
+            <button
+              type="button"
+              onClick={() => scrollToSection('services')}
+              className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
               Service
-            </Link>
+            </button>
           </li>
           <li>
-            <Link
-              href="#contact"
-              className="text-gray-800 hover:text-yellow-800 transition-colors"
+            <button
+              type="button"
+              onClick={() => scrollToSection('contact')}
+              className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
               Contact
-            </Link>
+            </button>
           </li>
         </ul>
       </motion.div>
