@@ -19,6 +19,7 @@ enum OrderStatus {
   FULFILLED
   SHIPPED
   CANCELLED
+  AWAITING_PAYMENT
 }
 
 model OrderItem {
@@ -43,6 +44,8 @@ model Order {
   customerAddress String
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  shippingProvider String?  
+  shippingCost     Int?    
   items         OrderItem[]
   paymentToken  String?     @unique
 }
@@ -91,5 +94,13 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Product {
+  id     String @id @default(cuid())
+  name   String
+  price  Int
+  weight String
+  image  String
 }
 

@@ -9,6 +9,7 @@ const formatCurrency = (amount: number) => new Intl.NumberFormat("id-ID", { styl
 
 const statusInfo: Record<OrderStatus, { text: string; color: string; icon: React.ReactNode }> = {
   PENDING: { text: "Awaiting Payment", color: "text-gray-600", icon: <FaSpinner className="animate-spin" /> },
+  AWAITING_PAYMENT: { text: "Awaiting Payment", color: "text-yellow-600", icon: <FaSpinner className="animate-spin" /> },
   PAID: { text: "Payment Successful", color: "text-blue-600", icon: <FaCheckCircle /> },
   FULFILLED: { text: "Order Being Prepared", color: "text-yellow-600", icon: <FaBox /> },
   SHIPPED: { text: "Order Shipped", color: "text-green-600", icon: <FaTruck /> },
@@ -44,7 +45,7 @@ export default async function OrderStatusPage({ params }: { params: { token: str
           </div>
           <p className="text-gray-600 mt-2">Thank you for your order, {order.customerName.split(' ')[0]}.</p>
         </div>
-        
+
         <div className="border-t border-b py-4 space-y-2">
           <div className="flex justify-between"><span className="text-gray-600">Order ID:</span><span className="font-mono text-sm">{order.id}</span></div>
           <div className="flex justify-between">
@@ -76,6 +77,7 @@ export default async function OrderStatusPage({ params }: { params: { token: str
         <div className="border-t pt-4 space-y-2">
           <div className="flex justify-between text-gray-700"><span>Subtotal:</span><span>{formatCurrency(order.subtotal)}</span></div>
           <div className="flex justify-between text-gray-700"><span>Service Fee:</span><span>{formatCurrency(order.serviceFee)}</span></div>
+          <div className="flex justify-between text-gray-700"><span>Shipping Fee:</span><span>{formatCurrency(order.shippingCost || 0)}</span></div>
           <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t"><span>Grand Total:</span><span>{formatCurrency(order.totalAmount)}</span></div>
         </div>
 

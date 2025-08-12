@@ -1,24 +1,12 @@
-"use client";
+// src/app/order/page.tsx
 
-import { useState, useEffect } from "react";
-import Order from "@/components/Order";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import prisma from "@/lib/prisma";
+import OrderClientPage from "./OrderClientPage";
 
-export default function OrderPage() {
-  const [isLoading, setIsLoading] = useState(true);
+// This Server Component fetches the product list from the database
+export default async function OrderPage() {
+  const products = await prisma.product.findMany();
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <main className="min-h-screen">
-      {isLoading ? (
-        <LoadingSpinner /> 
-      ) : (
-        <Order />
-      )}
-    </main>
-  );
+  // It then passes the products to the Client Component
+  return <OrderClientPage products={products} />;
 }

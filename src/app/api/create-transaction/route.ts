@@ -1,7 +1,8 @@
+// src/app/api/create-transaction/route.ts
+
 import { NextResponse } from "next/server";
 import midtransClient from "midtrans-client";
 import prisma from "@/lib/prisma";
-import crypto from 'crypto';
 
 const snap = new midtransClient.Snap({
   isProduction: false,
@@ -11,80 +12,69 @@ const snap = new midtransClient.Snap({
 
 export async function POST(request: Request) {
   try {
-    const { grandTotal, subtotal, serviceFee, items, customer } = await request.json();
+    const { orderId } = await request.json();
 
-    if (!grandTotal || !items || !customer || items.length === 0) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!orderId) {
+      return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
     }
 
-    const calculatedSubtotal = items.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
-    const calculatedServiceFee = calculatedSubtotal > 0 ? Math.ceil((calculatedSubtotal * 0.025) + 1000) : 0;
-    const calculatedGrandTotal = calculatedSubtotal + calculatedServiceFee;
-
-    if (grandTotal !== calculatedGrandTotal) {
-        return NextResponse.json({ error: "Price mismatch. Please try again." }, { status: 400 });
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!customer.email || !emailRegex.test(customer.email)) {
-      return NextResponse.json({ error: "Invalid email format." }, { status: 400 });
-    }
-
-    const paymentToken = crypto.randomBytes(32).toString('hex');
-
-    const newOrder = await prisma.order.create({
-      data: {
-        totalAmount: grandTotal, 
-        subtotal: subtotal,
-        serviceFee: serviceFee,
-        status: "PENDING",
-        customerName: `${customer.firstName} ${customer.lastName}`,
-        customerEmail: customer.email,
-        customerPhone: customer.phone,
-        customerAddress: customer.address,
-        paymentToken: paymentToken,
-        items: {
-          create: items.map((item: any) => ({
-            productId: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-        },
-      },
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
     });
 
-    const item_details = items.map((item: any) => ({
-      id: item.id,
+    if (!order || order.status !== 'AWAITING_PAYMENT') {
+      return NextResponse.json({ error: "Order not found or not awaiting payment" }, { status: 400 });
+    }
+
+    const item_details = order.items.map(item => ({
+      id: item.productId,
       price: item.price,
       quantity: item.quantity,
       name: item.name,
     }));
 
-    if (serviceFee > 0) {
-        item_details.push({
-            id: "SERVICE_FEE",
-            price: serviceFee,
-            quantity: 1,
-            name: "Service & Handling Fee"
-        });
+    if (order.serviceFee > 0) {
+      item_details.push({
+        id: "SERVICE_FEE",
+        price: order.serviceFee,
+        quantity: 1,
+        name: "Service & Handling Fee"
+      });
     }
-    
+
+    // You can also add shipping cost here if you want to display it separately
+    if (order.shippingCost && order.shippingCost > 0) {
+      item_details.push({
+        id: "SHIPPING_COST",
+        price: order.shippingCost ?? 0, // ensures it's a number, not null
+        quantity: 1,
+        name: `Shipping (${order.shippingProvider || "Courier"})`
+      });
+    }
+
+    const customerDetails = {
+      first_name: order.customerName.split(' ')[0],
+      last_name: order.customerName.split(' ').slice(1).join(' '),
+      email: order.customerEmail,
+      phone: order.customerPhone,
+      address: order.customerAddress,
+    };
+
     const parameter = {
       transaction_details: {
-        order_id: newOrder.id,
-        gross_amount: grandTotal,
+        order_id: order.id,
+        gross_amount: order.totalAmount,
       },
       item_details: item_details,
-      customer_details: {
-        first_name: customer.firstName,
-        last_name: customer.lastName,
-        email: customer.email,
-        phone: customer.phone,
-        address: customer.address,
-      },
+      customer_details: customerDetails,
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/order/success?token=${paymentToken}`,
+        // This is the most important part: after a successful payment,
+        // Midtrans will redirect the user back to this same status page,
+        // which will then show the 'PAID' status.
+        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/order/success?token=${order.paymentToken}`,
+        error: `${process.env.NEXT_PUBLIC_BASE_URL}/order/success?token=${order.paymentToken}`,
+        pending: `${process.env.NEXT_PUBLIC_BASE_URL}/order/success?token=${order.paymentToken}`,
       },
     };
 
@@ -93,7 +83,6 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("API Error:", error);
-  
     if (error.ApiResponse && error.ApiResponse.error_messages) {
       console.error("Midtrans Error:", error.ApiResponse.error_messages);
       return NextResponse.json(

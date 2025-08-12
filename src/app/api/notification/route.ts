@@ -1,3 +1,5 @@
+//app/api/notification/route.ts
+
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import crypto from 'crypto';
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
         where: { id: order_id },
       });
 
-      if (order && order.status === 'PENDING') {
+      if (order && order.status === 'AWAITING_PAYMENT') {
         // First, send the email using the 'order' object which has all the data
         if (order.paymentToken) {
            try {
