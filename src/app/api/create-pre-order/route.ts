@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    await prisma.order.create({
+    const createdOrder = await prisma.order.create({
       data: {
         totalAmount: 0,
         subtotal: subtotal,
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ message: "Pre-order created successfully" });
+    return NextResponse.json({ id: createdOrder.id, message: "Pre-order created successfully" });
 
   } catch (error) {
     console.error("Pre-order error:", error);

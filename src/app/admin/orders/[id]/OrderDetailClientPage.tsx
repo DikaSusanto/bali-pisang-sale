@@ -1,5 +1,3 @@
-// app/admin/orders/[id]/OrderDetailClientPage.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -39,6 +37,11 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newStatusToConfirm, setNewStatusToConfirm] = useState<OrderStatus | null>(null);
   const [finalShippingCost, setFinalShippingCost] = useState("");
+  const [isConfirmFinalizeOpen, setIsConfirmFinalizeOpen] = useState(false);
+  const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
+  const [shippingCostError, setShippingCostError] = useState<string | null>(null);
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value as OrderStatus;
@@ -77,18 +80,24 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
     setNewStatusToConfirm(null);
   };
 
-  const handleFinalizeOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!finalShippingCost || isNaN(parseInt(finalShippingCost))) {
-      alert("Please enter a valid final shipping cost.");
+  // Finalize order handler (called from modal)
+  const handleFinalizeOrder = async () => {
+    setShippingCostError(null);
+    const cost = parseInt(finalShippingCost);
+    if (!finalShippingCost || isNaN(cost)) {
+      setShippingCostError("Please enter a valid shipping cost.");
       return;
     }
-    setIsUpdating(true);
+    if (cost < 5000) {
+      setShippingCostError("Minimum shipping fee is Rp 5.000.");
+      return;
+    }
+    setIsFinalizing(true);
     try {
       const response = await fetch(`/api/orders/${order.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ finalShippingCost: parseInt(finalShippingCost) }),
+        body: JSON.stringify({ finalShippingCost: cost }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -96,10 +105,33 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
       }
       const updatedOrderData = await response.json();
       setOrder(updatedOrderData);
+      setFinalShippingCost("");
+    } catch (error: any) {
+      setShippingCostError(error.message || "Failed to finalize order.");
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
+  // Cancel order handler (called from modal)
+  const handleCancelOrder = async () => {
+    setIsCancelling(true);
+    try {
+      const response = await fetch(`/api/orders/${order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CANCELLED' }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to cancel order.");
+      }
+      const updatedOrder = await response.json();
+      setOrder(updatedOrder);
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     } finally {
-      setIsUpdating(false);
+      setIsCancelling(false);
     }
   };
 
@@ -125,6 +157,7 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
               <p><strong>Email:</strong> {order.customerEmail}</p>
               <p><strong>Phone:</strong> {order.customerPhone}</p>
               <p><strong>Address:</strong> {order.customerAddress}</p>
+              <p><strong>Order Time:</strong> {new Date(order.createdAt).toLocaleString('en-GB', { timeZone: 'Asia/Makassar', hour12: false })} WITA</p>
             </div>
 
             {order.status === 'PENDING' && (
@@ -135,7 +168,7 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
                   <div className="flex justify-between"><span>Service Fee:</span><span>{formatCurrency(order.serviceFee)}</span></div>
                   <div className="flex justify-between"><span>Shipping (est.):</span><span className="italic">{formatCurrency(order.shippingCost || 0)}</span></div>
                 </div>
-                <form onSubmit={handleFinalizeOrder}>
+                <form onSubmit={e => e.preventDefault()}>
                   <label htmlFor="finalShippingCost" className="block font-medium mb-2">Enter Final Shipping Cost (Rp)</label>
                   <input
                     type="number"
@@ -146,8 +179,24 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
                     placeholder="e.g., 25000"
                     required
                   />
-                  <button type="submit" disabled={isUpdating} className="w-full mt-4 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-                    {isUpdating ? 'Sending Invoice...' : 'Confirm & Send Payment Link'}
+                  {shippingCostError && (
+                    <p className="text-red-600 text-sm mt-1">{shippingCostError}</p>
+                  )}
+                  <button
+                    type="button"
+                    disabled={isFinalizing}
+                    className="w-full mt-4 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+                    onClick={() => setIsConfirmFinalizeOpen(true)}
+                  >
+                    {isFinalizing ? 'Sending Invoice...' : 'Confirm & Send Payment Link'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmCancelOpen(true)}
+                    disabled={isCancelling}
+                    className="w-full mt-4 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400"
+                  >
+                    {isCancelling ? 'Cancelling...' : 'Cancel Order'}
                   </button>
                 </form>
               </div>
@@ -207,6 +256,7 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
           </div>
         </div>
       </div>
+      {/* Status change modal */}
       <ConfirmationModal
         isOpen={isModalOpen}
         onClose={cancelStatusUpdate}
@@ -216,6 +266,35 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
       >
         {finalStatusWarning}
         <p>Are you sure you want to change the status from <strong>{order.status}</strong> to <strong>{newStatusToConfirm}</strong>?</p>
+      </ConfirmationModal>
+      {/* Finalize order modal */}
+      <ConfirmationModal
+        isOpen={isConfirmFinalizeOpen}
+        onClose={() => setIsConfirmFinalizeOpen(false)}
+        onConfirm={async () => {
+          setIsConfirmFinalizeOpen(false);
+          await handleFinalizeOrder();
+        }}
+        isConfirming={isFinalizing}
+        title="Confirm Finalize Order"
+      >
+        <p>Are you sure you want to confirm and send the payment link to the customer?</p>
+      </ConfirmationModal>
+      {/* Cancel order modal */}
+      <ConfirmationModal
+        isOpen={isConfirmCancelOpen}
+        onClose={() => setIsConfirmCancelOpen(false)}
+        onConfirm={async () => {
+          setIsConfirmCancelOpen(false);
+          await handleCancelOrder();
+        }}
+        isConfirming={isCancelling}
+        title="Confirm Cancel Order"
+      >
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-3 mb-3 rounded">
+          <strong>Warning:</strong> This action cannot be undone.
+        </div>
+        <p>Are you sure you want to cancel this order?</p>
       </ConfirmationModal>
     </>
   );

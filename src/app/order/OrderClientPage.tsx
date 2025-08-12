@@ -1,4 +1,3 @@
-// FILE: src/app/order/OrderClientPage.tsx
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -42,7 +41,9 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
     const [cart, setCart] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({ firstName: "", lastName: "", email: "", phone: "", address: "" });
-    const [shippingError, setShippingError] = useState("");
+
+    // Use only one error state for all shipping-related errors
+    const [shippingError, setShippingError] = useState<string | null>(null);
 
     const [provinces, setProvinces] = useState<AreaOption[]>([]);
     const [cities, setCities] = useState<AreaOption[]>([]);
@@ -148,7 +149,6 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
         }
     }, [selectedCityId]);
 
-
     // --- Event Handlers ---
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -158,9 +158,19 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
         }
     };
 
-    const handleAddProduct = (productId: string) => { if (!productId) return; const existingItem = cart.find((item) => item.productId === productId); if (!existingItem) { setCart((prevCart) => [...prevCart, { productId, quantity: 1 }]); } };
-    const handleQuantityChange = (productId: string, amount: number) => { setCart((prevCart) => prevCart.map((item) => item.productId === productId ? { ...item, quantity: Math.max(1, item.quantity + amount) } : item)) };
-    const handleRemoveItem = (productId: string) => { setCart((prevCart) => prevCart.filter((item) => item.productId !== productId)) };
+    const handleAddProduct = (productId: string) => {
+        if (!productId) return;
+        const existingItem = cart.find((item) => item.productId === productId);
+        if (!existingItem) {
+            setCart((prevCart) => [...prevCart, { productId, quantity: 1 }]);
+        }
+    };
+    const handleQuantityChange = (productId: string, amount: number) => {
+        setCart((prevCart) => prevCart.map((item) => item.productId === productId ? { ...item, quantity: Math.max(1, item.quantity + amount) } : item));
+    };
+    const handleRemoveItem = (productId: string) => {
+        setCart((prevCart) => prevCart.filter((item) => item.productId !== productId));
+    };
 
     const validateForm = () => {
         const newErrors = { firstName: "", lastName: "", email: "", phone: "", address: "" };
@@ -177,13 +187,13 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
     };
 
     const handleCalculateShipping = async () => {
-        if (!selectedSubdistrictId || totalWeight === 0) {
+        if (!selectedSubdistrictId || cart.length === 0 || totalWeight === 0) {
             setShippingError("Please select a complete destination and add items to your cart.");
             return;
         }
         setIsCalculatingShipping(true);
         setEstimatedShippingCost(null);
-        setShippingError("");
+        setShippingError(null);
 
         try {
             const response = await fetch('/api/rajaongkir/courier-rates', {
@@ -200,17 +210,34 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
             }
             setEstimatedShippingCost(data.estimatedPrice);
         } catch (error: any) {
-            setShippingError(error.message);
+            setShippingError(error.message || "Failed to get shipping options.");
         } finally {
             setIsCalculatingShipping(false);
         }
     };
 
+    // Clear shipping error when user recalculates shipping or changes cart
+    useEffect(() => {
+        setShippingError(null);
+    }, [estimatedShippingCost, cart, selectedSubdistrictId]);
+
+    // Generic error for order submission
+    const [orderError, setOrderError] = useState<string | null>(null);
+
     const handleOrderSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        if (!validateForm()) { return; }
-        if (cart.length === 0) { alert("Your cart is empty."); return; }
-        if (estimatedShippingCost === null) { alert("Please calculate a shipping cost estimate."); return; }
+        setOrderError(null);
+
+        let hasError = false;
+        if (!validateForm()) { hasError = true; }
+        if (cart.length === 0) {
+            setShippingError("Your cart is empty.");
+            hasError = true;
+        } else if (estimatedShippingCost === null) {
+            setShippingError("Please calculate a shipping cost estimate.");
+            hasError = true;
+        }
+        if (hasError) return;
 
         setIsLoading(true);
 
@@ -236,9 +263,10 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
             if (!response.ok) {
                 throw new Error("Failed to place your pre-order.");
             }
-            router.push('/order/pre-order-success');
+            const data = await response.json();
+            router.push(`/order/pre-order-success/${data.id}`);
         } catch (error: any) {
-            alert(error.message);
+            setOrderError(error.message || "Failed to place your pre-order. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -399,6 +427,10 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                                     <span>Grand Total (est.)</span>
                                     <span>{formatCurrency(grandTotal)}</span>
                                 </div>
+                                {/* Show generic order error here */}
+                                {orderError && (
+                                    <p className="text-red-600 text-sm mt-3">{orderError}</p>
+                                )}
                                 <button type="submit" disabled={isLoading} className="w-full mt-6 bg-primary text-white font-bold py-3 px-6 rounded-lg transition-colors hover:opacity-90 disabled:bg-gray-400">
                                     {isLoading ? 'Placing Order...' : 'Place Pre-Order'}
                                 </button>
