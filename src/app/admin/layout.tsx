@@ -11,7 +11,7 @@ export default function AdminLayout({
     <AuthProvider>
       <div className="min-h-screen bg-stone-50">
         <header className="bg-white shadow-md">
-          <div className="container mx-auto px-4 lg:px-24">
+          <div className="container mx-auto px-4 sm:px-6 xl:px-8">
             <div className="flex justify-between items-center py-4">
               <h1 className="text-2xl font-bold text-primary">Admin Panel</h1>
               <AuthStatus />

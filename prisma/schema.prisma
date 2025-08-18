@@ -24,7 +24,7 @@ enum OrderStatus {
 
 model OrderItem {
   id        String   @id @default(cuid())
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   String
   productId String
   name      String
