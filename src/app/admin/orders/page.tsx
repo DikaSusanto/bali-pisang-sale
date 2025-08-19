@@ -6,6 +6,12 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import OrdersClientPage from "./OrdersClientPage";
 import { OrderStatus } from "@prisma/client";
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Admin Orders | Bali Pisang Sale',
+  description: 'View and manage all orders in the admin panel.',
+};
 
 // Define the expected search parameters from the URL, including pagination
 interface AdminOrdersPageProps {

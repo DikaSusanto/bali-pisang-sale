@@ -2,6 +2,12 @@
 
 import prisma from "@/lib/prisma";
 import OrderClientPage from "./OrderClientPage";
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Order Pisang Sale | Bali Pisang Sale',
+  description: 'Order your Pisang Sale products online from Bali Pisang Sale.',
+};
 
 // This Server Component fetches the product list from the database
 export default async function OrderPage() {

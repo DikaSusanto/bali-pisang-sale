@@ -5,6 +5,12 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import ProductsClientPage from "./ProductsClientPage";
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Admin Products | Bali Pisang Sale',
+  description: 'View and manage all products in the admin panel.',
+};
 
 export default async function ProductsPage({
   searchParams,

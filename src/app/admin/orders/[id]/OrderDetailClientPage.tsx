@@ -42,6 +42,7 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
   const [shippingCostError, setShippingCostError] = useState<string | null>(null);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value as OrderStatus;
@@ -53,6 +54,7 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
     if (!order || !newStatusToConfirm) return;
     setIsUpdating(true);
     setIsModalOpen(false);
+    setGeneralError(null);
     try {
       const response = await fetch(`/api/orders/${order.id}`, {
         method: 'PATCH',
@@ -68,7 +70,7 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       console.error("Failed to update status:", error);
-      alert(`Error: ${message}`);
+      setGeneralError(message);
     } finally {
       setIsUpdating(false);
       setNewStatusToConfirm(null);
@@ -116,6 +118,7 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
   // Cancel order handler (called from modal)
   const handleCancelOrder = async () => {
     setIsCancelling(true);
+    setGeneralError(null);
     try {
       const response = await fetch(`/api/orders/${order.id}`, {
         method: 'PATCH',
@@ -129,7 +132,7 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
       const updatedOrder = await response.json();
       setOrder(updatedOrder);
     } catch (error: any) {
-      alert(`Error: ${error.message}`);
+      setGeneralError(error.message);
     } finally {
       setIsCancelling(false);
     }
@@ -148,6 +151,11 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
   return (
     <>
       <div className="container mx-auto px-4 lg:px-24">
+        {generalError && (
+          <div className="mb-4 px-4 py-2 rounded bg-red-100 text-red-800 text-center font-semibold">
+            {generalError}
+          </div>
+        )}
         <Link href="/admin/orders" className="text-primary hover:underline mb-6 block">&larr; Back to All Orders</Link>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 space-y-6">

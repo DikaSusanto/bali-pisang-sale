@@ -2,6 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import OrderStatusUI from './OrderStatusUI';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Pay for Your Order | Bali Pisang Sale',
+  description: 'Complete your payment for your Bali Pisang Sale order and view your order details and status.',
+};
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("id-ID", {

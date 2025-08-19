@@ -1,6 +1,12 @@
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Pre-Order Success | Bali Pisang Sale',
+  description: 'Your pre-order has been received. Bali Pisang Sale will confirm your order and send payment details soon.',
+};
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);

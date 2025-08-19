@@ -3,6 +3,12 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { OrderStatus } from "@prisma/client";
 import { FaCheckCircle, FaTimesCircle, FaSpinner, FaBox, FaTruck } from 'react-icons/fa';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Order Status | Bali Pisang Sale',
+  description: 'View the current status and details of your Bali Pisang Sale order, including payment, shipping, and fulfillment updates.',
+};
 
 // --- Helper Components & Data ---
 const formatCurrency = (amount: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);

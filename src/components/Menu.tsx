@@ -40,14 +40,14 @@ export default function Menu() {
       id: 2,
       name: 'Pisang Sale',
       size: '100 gr',
-      price: 'IDR 15K',
+      price: 'IDR 20K',
       image: '/img/1685364484811.png',
     },
     {
       id: 3,
       name: 'Pisang Sale Special',
       size: '300 gr',
-      price: 'IDR 55K',
+      price: 'IDR 50K',
       image: '/img/1685364484811.png',
     }
   ];
