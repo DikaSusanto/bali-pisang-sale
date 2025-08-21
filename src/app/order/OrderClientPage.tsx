@@ -6,6 +6,7 @@ import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { FaPlus, FaMinus, FaTrash } from "react-icons/fa";
+import { HiArrowLeft, HiInformationCircle } from "react-icons/hi";
 import Link from "next/link";
 import { Product } from "@prisma/client";
 import { useRouter } from "next/navigation";
@@ -36,6 +37,45 @@ const formatWeight = (weightString: string) => {
     const match = weightString.match(/(\d+)/);
     return match ? parseInt(match[1], 10) : 0;
 };
+
+// Pre-Order Information Banner Component
+const PreOrderInfoBanner = () => (
+    <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8"
+    >
+        <div className="flex items-start gap-4">
+            <HiInformationCircle className="text-blue-500 text-2xl mt-1 flex-shrink-0" />
+            <div>
+                <h3 className="font-semibold text-blue-900 mb-3">How Our Pre-Order System Works</h3>
+                <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                        <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">1</span>
+                        <p className="text-sm text-blue-800"><strong>Place Pre-Order:</strong> Fill out your details below (shipping costs shown are estimates)</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">2</span>
+                        <p className="text-sm text-blue-800"><strong>We Confirm:</strong> We'll verify product availability & calculate final shipping costs</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">3</span>
+                        <p className="text-sm text-blue-800"><strong>Payment Link:</strong> You'll receive a secure payment link via email within 24 hours</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">4</span>
+                        <p className="text-sm text-blue-800"><strong>Safe Delivery:</strong> After payment, we'll carefully package and ship your order</p>
+                    </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-blue-200">
+                    <p className="text-xs text-blue-700">
+                        💡 <strong>No payment required now</strong> - you'll only pay after we confirm your order details!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </motion.div>
+);
 
 export default function OrderClientPage({ products }: OrderClientPageProps) {
     const router = useRouter();
@@ -282,11 +322,20 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
             className="bg-stone-50 px-4 py-16 lg:px-24"
         >
             <div className="container mx-auto">
-                <h1 className="text-4xl text-center font-bold text-primary mb-12">Checkout</h1>
-                <Link href="/" className="text-primary hover:underline mb-6 block">&larr; Back to Home Page</Link>
+                <h1 className="text-4xl text-center font-bold text-primary mb-12">Pre-Order Checkout</h1>
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-primary hover:text-yellow-800 transition-colors duration-200 mb-8"
+                >
+                    <HiArrowLeft className="text-xl" />
+                    <span className="font-medium">Back to Home</span>
+                </Link>
+
+                {/* Information Banner */}
+                <PreOrderInfoBanner />
 
                 <form onSubmit={handleOrderSubmit} noValidate className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 bg-white p-8 rounded-xl shadow-md">
+                    <div className="lg:col-span-2 bg-white p-8 rounded-xl shadow-md order-2 lg:order-1">
                         <h2 className="text-2xl font-semibold text-gray-800 mb-6">Customer & Shipping Information</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -356,6 +405,7 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                             <button type="button" onClick={handleCalculateShipping} disabled={isCalculatingShipping || !selectedSubdistrictId || cart.length === 0} className="w-full bg-primary text-white font-bold py-2 px-4 rounded-lg disabled:bg-gray-400">
                                 {isCalculatingShipping ? 'Calculating...' : 'Calculate Estimated Shipping'}
                             </button>
+                            <p className="text-sm text-gray-600 mt-2">Total Weight: {totalWeight}g</p>
                             {totalWeight > 0 && totalWeight < 1000 && (
                                 <p className="text-xs text-gray-500 mt-2">
                                     Shipping is calculated with a minimum weight of 1kg (1000g), per courier policy.
@@ -371,7 +421,7 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                         </div>
                     </div>
 
-                    <div className="lg:col-span-1 bg-white p-8 rounded-xl shadow-md">
+                    <div className="lg:col-span-1 bg-white p-8 rounded-xl shadow-md order-1 lg:order-2">
                         <h2 className="text-2xl font-semibold text-gray-800 mb-6">Your Order</h2>
                         <div>
                             <label htmlFor="product-adder" className="block text-gray-700 font-medium mb-2">Add a Product</label>
@@ -434,7 +484,7 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                                     <p className="text-red-600 text-sm mt-3">{orderError}</p>
                                 )}
                                 <button type="submit" disabled={isLoading} className="w-full mt-6 bg-primary text-white font-bold py-3 px-6 rounded-lg transition-colors hover:opacity-90 disabled:bg-gray-400">
-                                    {isLoading ? 'Placing Order...' : 'Place Pre-Order'}
+                                    {isLoading ? 'Placing Pre-Order...' : 'Place Pre-Order'}
                                 </button>
                             </div>
                         )}

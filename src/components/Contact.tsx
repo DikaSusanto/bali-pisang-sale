@@ -29,7 +29,9 @@ const itemVariant = {
 const scrollToSection = (sectionId: string) => {
   const section = document.getElementById(sectionId);
   if (section) {
-    section.scrollIntoView({ behavior: 'smooth' });
+    const yOffset = -80;
+    const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({ top: y, behavior: 'smooth' });
   }
 };
 
@@ -39,7 +41,7 @@ export default function Contact() {
       variants={containerVariant}
       initial="hidden"
       whileInView="visible"
-      viewport={{ amount: 0.3 }}
+      viewport={{ amount: 0.01 }}
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 py-12 lg:px-24"
       id="order"
     >
@@ -107,10 +109,10 @@ export default function Contact() {
           <li>
             <button
               type="button"
-              onClick={() => scrollToSection('contact')}
+              onClick={() => scrollToSection('order')}
               className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
-              Contact
+              Order
             </button>
           </li>
         </ul>
@@ -127,7 +129,7 @@ export default function Contact() {
         </div>
         <div className="flex items-center space-x-3 mb-2">
           <HiPhone className="text-gray-800 text-base flex-shrink-0" />
-          <span className="text-gray-600 text-sm">+62 813 383 251 09</span>
+          <span className="text-gray-600 text-sm">+62 813 530 181 30</span>
         </div>
         <div className="flex items-center space-x-3">
           <HiMail className="text-gray-800 text-base flex-shrink-0" />

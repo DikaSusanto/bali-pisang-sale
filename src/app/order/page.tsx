@@ -5,7 +5,7 @@ import OrderClientPage from "./OrderClientPage";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Order Pisang Sale | Bali Pisang Sale',
+  title: 'Order | Bali Pisang Sale',
   description: 'Order your Pisang Sale products online from Bali Pisang Sale.',
 };
 
