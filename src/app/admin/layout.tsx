@@ -20,6 +20,7 @@ export default function AdminLayout({
               <ul className="flex items-center gap-6 text-sm font-semibold">
                 <li><Link href="/admin/orders" className="text-gray-600 hover:text-primary py-3 block">Orders</Link></li>
                 <li><Link href="/admin/products" className="text-gray-600 hover:text-primary py-3 block">Products</Link></li>
+                <li><Link href="/admin/email-log" className="text-gray-600 hover:text-primary py-3 block">Email Logs</Link></li>
               </ul>
             </nav>
           </div>

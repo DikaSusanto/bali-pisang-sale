@@ -23,8 +23,8 @@ enum OrderStatus {
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id        String @id @default(cuid())
+  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   String
   productId String
   name      String
@@ -33,21 +33,23 @@ model OrderItem {
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  totalAmount   Int
-  subtotal      Int
-  serviceFee    Int
-  status        OrderStatus @default(PENDING)
-  customerName  String
-  customerEmail String
-  customerPhone String
-  customerAddress String
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  shippingProvider String?  
-  shippingCost     Int?    
-  items         OrderItem[]
-  paymentToken  String?     @unique
+  id               String      @id @default(cuid())
+  totalAmount      Int
+  subtotal         Int
+  serviceFee       Int
+  status           OrderStatus @default(PENDING)
+  customerName     String
+  customerEmail    String
+  customerPhone    String
+  customerAddress  String
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  shippingProvider String?
+  shippingCost     Int?
+  items            OrderItem[]
+  paymentToken     String?     @unique
+
+  emailLogs EmailLog[]
 }
 
 model Account {
@@ -104,3 +106,23 @@ model Product {
   image  String
 }
 
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model EmailLog {
+  id         String      @id @default(cuid())
+  orderId    String? // optional, to link to an order
+  to         String
+  subject    String
+  body       String      @db.Text
+  status     EmailStatus @default(PENDING)
+  error      String?     @db.Text
+  retryCount Int         @default(0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  order Order? @relation(fields: [orderId], references: [id])
+}
