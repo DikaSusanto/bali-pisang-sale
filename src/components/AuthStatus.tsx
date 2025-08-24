@@ -1,8 +1,16 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut, SessionProvider } from "next-auth/react";
 
 export default function AuthStatus() {
+  return (
+    <SessionProvider>
+      <AuthStatusInner />
+    </SessionProvider>
+  );
+}
+
+function AuthStatusInner() {
   const { data: session, status } = useSession();
 
   if (status === "loading") {

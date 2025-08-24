@@ -84,7 +84,7 @@ model User {
   name           String?
   email          String?   @unique
   emailVerified  DateTime?
-  hashedPassword String? // Changed from your Admin model
+  hashedPassword String? 
   image          String?
   accounts       Account[]
   sessions       Session[]
@@ -125,4 +125,12 @@ model EmailLog {
   updatedAt  DateTime    @updatedAt
 
   order Order? @relation(fields: [orderId], references: [id])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  count     Int      @default(0)
+  lastAttempt DateTime @default(now())
+  lockedUntil DateTime?
 }

@@ -46,7 +46,7 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setGeneralError("Invalid credentials. Please try again.");
+        setGeneralError(result.error);
       } else {
         router.push("/admin/orders");
       }

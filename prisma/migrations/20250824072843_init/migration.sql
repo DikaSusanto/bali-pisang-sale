@@ -110,6 +110,17 @@ CREATE TABLE "public"."EmailLog" (
     CONSTRAINT "EmailLog_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."LoginAttempt" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "count" INTEGER NOT NULL DEFAULT 0,
+    "lastAttempt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "lockedUntil" TIMESTAMP(3),
+
+    CONSTRAINT "LoginAttempt_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Order_paymentToken_key" ON "public"."Order"("paymentToken");
 
@@ -127,6 +138,9 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "public"."VerificationToken
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "public"."VerificationToken"("identifier", "token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "LoginAttempt_email_key" ON "public"."LoginAttempt"("email");
 
 -- AddForeignKey
 ALTER TABLE "public"."OrderItem" ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "public"."Order"("id") ON DELETE CASCADE ON UPDATE CASCADE;
