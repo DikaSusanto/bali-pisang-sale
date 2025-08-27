@@ -67,7 +67,8 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, productToE
       });
 
       if (!response.ok) {
-        throw new Error("Upload failed.");
+        const result = await response.json();
+        throw new Error(result.error || "Upload failed.");
       }
 
       const result = await response.json();

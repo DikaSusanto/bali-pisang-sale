@@ -45,6 +45,8 @@ export default function ProductsClientPage({
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
+  const [generalError, setGeneralError] = useState<string | null>(null);
+
   const totalPages = useMemo(() => Math.ceil(totalProductsCount / itemsPerPage), [totalProductsCount, itemsPerPage]);
   const pageNumbers: number[] = [];
   const maxPagesToShow = 5;
@@ -97,50 +99,85 @@ export default function ProductsClientPage({
   };
 
   const handleAddProduct = async (productData: any) => {
-    const response = await fetch('/api/admin/products', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData),
-    });
-
-    if (!response.ok) {
+    setGeneralError(null);
+    const payload = { ...productData, price: Number(productData.price) };
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
       const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to add product.");
+      if (!response.ok) {
+        setGeneralError(errorData.error || "Failed to add product.");
+        return;
+      }
+      setGeneralError("Product added successfully.");
+      fetchProducts();
+      setIsAddModalOpen(false);
+    } catch (error: any) {
+      setGeneralError(error.message || "Failed to add product.");
     }
-    fetchProducts();
-    setIsAddModalOpen(false);
   };
 
   const handleUpdateProduct = async (productData: any) => {
+    setGeneralError(null);
     if (!productToEdit) return;
-    const response = await fetch(`/api/admin/products/${productToEdit.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to update product.");
+    const payload = { ...productData, price: Number(productData.price) };
+    try {
+      const response = await fetch(`/api/admin/products/${productToEdit.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const errorData = await response.json();
+      if (!response.ok) {
+        setGeneralError(errorData.error || "Failed to update product.");
+        return;
+      }
+      setGeneralError("Product updated successfully.");
+      fetchProducts();
+      setProductToEdit(null);
+    } catch (error: any) {
+      setGeneralError(error.message || "Failed to update product.");
     }
-    fetchProducts();
-    setProductToEdit(null);
   };
 
   const confirmDelete = async () => {
+    setGeneralError(null);
     if (!productToDelete) return;
-    const response = await fetch(`/api/admin/products/${productToDelete.id}`, {
-      method: 'DELETE',
-    });
-    if (response.ok) {
+    try {
+      const response = await fetch(`/api/admin/products/${productToDelete.id}`, {
+        method: 'DELETE',
+      });
+      const errorData = await response.json();
+      if (!response.ok) {
+        setGeneralError(errorData.error || "Failed to delete product.");
+        setProductToDelete(null);
+        return;
+      }
+      setGeneralError("Product deleted successfully."); // Show success
       fetchProducts();
-    } else {
-      alert("Failed to delete product.");
+      setProductToDelete(null);
+    } catch (error: any) {
+      setGeneralError(error.message || "Failed to delete product.");
+      setProductToDelete(null);
     }
-    setProductToDelete(null);
   };
 
   return (
     <>
       <div className="container mx-auto px-4 sm:px-6 xl:px-8 py-6">
+        {generalError && (
+          <div
+            className={`mb-4 p-4 border rounded ${generalError.toLowerCase().includes("success")
+                ? "bg-green-100 border-green-400 text-green-700"
+                : "bg-red-100 border-red-400 text-red-700"
+              }`}
+          >
+            {generalError}
+          </div>
+        )}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Manage Products</h1>
           <button
@@ -221,9 +258,8 @@ export default function ProductsClientPage({
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`px-3 py-1 rounded-md text-sm font-medium ${
-                    currentPage === page ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  } disabled:opacity-50`}
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${currentPage === page ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    } disabled:opacity-50`}
                 >
                   {page}
                 </button>

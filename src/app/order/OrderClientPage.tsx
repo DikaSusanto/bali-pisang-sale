@@ -191,6 +191,11 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
         }
     }, [selectedCityId]);
 
+    useEffect(() => {
+        setEstimatedShippingCost(null);
+        setShippingError(null);
+    }, [cart]);
+
     // --- Event Handlers ---
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -294,6 +299,7 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                 return { id: product?.id, name: product?.name, price: product?.price, quantity: item.quantity };
             }),
             customer: { ...customer, address: fullAddress },
+            shippingProvider: "JNE"
         };
 
         try {

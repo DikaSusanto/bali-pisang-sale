@@ -7,8 +7,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import crypto from 'crypto';
 import { sendMailWithLog } from "@/lib/mail";
+import { ratelimit } from "@/lib/rateLimit";
 
-// Helper function for email formatting
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -16,7 +16,6 @@ const formatCurrency = (amount: number) =>
     minimumFractionDigits: 0,
   }).format(amount);
 
-// Updated transitions to include the new status
 const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING: [OrderStatus.AWAITING_PAYMENT, OrderStatus.CANCELLED],
   AWAITING_PAYMENT: [OrderStatus.PAID, OrderStatus.CANCELLED],
@@ -26,29 +25,6 @@ const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   CANCELLED: [],
 };
 
-// GET handler
-export async function GET(
-  request: Request,
-  context: { params: { id: string } }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  try {
-    const { id } = await context.params;
-    const order = await prisma.order.findUniqueOrThrow({
-      where: { id: id },
-      include: { items: true },
-    });
-    return NextResponse.json(order);
-  } catch (error) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
-  }
-}
-
-// PATCH handler
 export async function PATCH(
   request: Request,
   context: { params: { id: string } }
@@ -58,26 +34,36 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Rate limit by IP address
+  const ip = request.headers.get("x-forwarded-for") || "anonymous";
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+  }
+
   try {
     const { id } = await context.params;
     const body = await request.json();
 
-    // A) Finalizing a pre-order with shipping cost
-    if (body.finalShippingCost) {
-      const { finalShippingCost } = body;
+    // Finalize shipping cost
+    if (body.finalShippingCost !== undefined) {
+      const cost = Number(body.finalShippingCost);
+      if (isNaN(cost) || cost < 5000) {
+        return NextResponse.json({ error: "Shipping cost must be at least Rp 5.000." }, { status: 400 });
+      }
 
       const order = await prisma.order.findUnique({ where: { id } });
       if (!order || order.status !== 'PENDING') {
-        throw new Error("Order not found or cannot be finalized.");
+        return NextResponse.json({ error: "Order not found or cannot be finalized." }, { status: 400 });
       }
 
-      const grandTotal = order.subtotal + order.serviceFee + finalShippingCost;
+      const grandTotal = order.subtotal + order.serviceFee + cost;
       const paymentToken = crypto.randomBytes(32).toString('hex');
 
       const updatedOrder = await prisma.order.update({
         where: { id },
         data: {
-          shippingCost: finalShippingCost,
+          shippingCost: cost,
           totalAmount: grandTotal,
           status: 'AWAITING_PAYMENT',
           paymentToken: paymentToken,
@@ -101,12 +87,16 @@ export async function PATCH(
       }
 
       return NextResponse.json(updatedOrder);
+    }
 
-      // B) Simple status update (e.g., FULFILLED -> SHIPPED)
-    } else if (body.status) {
+    // Status update
+    if (body.status) {
       const { status: newStatus } = body;
-      const currentOrder = await prisma.order.findUnique({ where: { id } });
+      if (!Object.values(OrderStatus).includes(newStatus)) {
+        return NextResponse.json({ error: "Invalid status value." }, { status: 400 });
+      }
 
+      const currentOrder = await prisma.order.findUnique({ where: { id } });
       if (!currentOrder) {
         return NextResponse.json({ error: "Order not found" }, { status: 404 });
       }

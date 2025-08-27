@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { EmailStatus } from "@prisma/client";
+import { ratelimit } from "@/lib/rateLimit";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -64,6 +65,14 @@ export async function PATCH(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Rate limit by IP address
+  const ip = req.headers.get("x-forwarded-for") || "anonymous";
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+  }
+
   const body = await req.json();
   const { id, status } = body;
   if (!id || !status || !Object.values(EmailStatus).includes(status)) {
@@ -85,6 +94,14 @@ export async function DELETE(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Rate limit by IP address
+  const ip = req.headers.get("x-forwarded-for") || "anonymous";
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const ids = searchParams.getAll("id");
   if (!ids || ids.length === 0) {

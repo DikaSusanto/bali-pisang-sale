@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import { OrderStatus } from "@prisma/client"; 
+import { OrderStatus } from "@prisma/client";
+import { ratelimit } from "@/lib/rateLimit";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -77,6 +78,13 @@ export async function DELETE(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Rate limit by IP address
+  const ip = req.headers.get("x-forwarded-for") || "anonymous";
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
   }
 
   try {

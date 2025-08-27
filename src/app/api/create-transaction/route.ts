@@ -3,6 +3,8 @@
 import { NextResponse } from "next/server";
 import midtransClient from "midtrans-client";
 import prisma from "@/lib/prisma";
+import { ratelimit } from "@/lib/rateLimit";
+import { z } from "zod";
 
 const snap = new midtransClient.Snap({
   isProduction: false,
@@ -10,13 +12,26 @@ const snap = new midtransClient.Snap({
   clientKey: process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY,
 });
 
-export async function POST(request: Request) {
-  try {
-    const { orderId } = await request.json();
+const transactionSchema = z.object({
+  orderId: z.string().min(1),
+});
 
-    if (!orderId) {
-      return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
+export async function POST(request: Request) {
+  // Rate limit by IP address
+  const ip = request.headers.get("x-forwarded-for") || "anonymous";
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+  }
+
+  try {
+    const body = await request.json();
+    const parsed = transactionSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid input", details: parsed.error.issues }, { status: 400 });
     }
+
+    const { orderId } = parsed.data;
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },

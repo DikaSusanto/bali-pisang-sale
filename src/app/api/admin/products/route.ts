@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { ratelimit } from "@/lib/rateLimit";
+import { z } from "zod";
+
+// Zod schema for product validation
+const productSchema = z.object({
+  name: z.string().min(1).max(100).trim(),
+  price: z.preprocess((val) => Number(val), z.number().int().positive()),
+  weight: z.string().min(1).max(20).trim(),
+  image: z.string().min(1), 
+});
 
 // GET: Fetch all products
 export async function GET(req: Request) {
@@ -43,19 +53,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Rate limit by IP address
+  const ip = request.headers.get("x-forwarded-for") || "anonymous";
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+  }
+
   try {
     const body = await request.json();
-    const { name, price, weight, image } = body;
-
-    // Basic validation
-    if (!name || !price || !weight || !image) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    // Validate input using Zod
+    const parsed = productSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid input", details: parsed.error.issues }, { status: 400 });
     }
+    const { name, price, weight, image } = parsed.data;
 
     const newProduct = await prisma.product.create({
       data: {
         name,
-        price: parseInt(price, 10),
+        price,
         weight,
         image
       }
