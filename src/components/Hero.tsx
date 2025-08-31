@@ -4,6 +4,7 @@ import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { HiPlay, HiStar, HiLocationMarker, HiHeart } from 'react-icons/hi';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariant = {
   hidden: { opacity: 0 },
@@ -64,6 +65,7 @@ const badgeVariant = {
 export default function Hero() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+  const { t } = useLanguage();
 
   // Mouse tracking for parallax effect
   const mouseX = useMotionValue(0);
@@ -99,9 +101,9 @@ export default function Hero() {
   };
 
   const badges = [
-    { icon: <HiStar />, text: "#1 in Bali", position: "top-16 right-20" },
-    { icon: <HiHeart />, text: "Made with Love", position: "bottom-32 left-12" },
-    { icon: <HiLocationMarker />, text: "100% Local", position: "top-32 left-16" },
+    { icon: <HiStar />, text: t('hero.badge1'), position: "top-16 right-20" },
+    { icon: <HiHeart />, text: t('hero.badge2'), position: "bottom-32 left-12" },
+    { icon: <HiLocationMarker />, text: t('hero.badge3'), position: "top-32 left-16" },
   ];
 
   return (
@@ -155,7 +157,7 @@ export default function Hero() {
             >
               <HiStar className="text-yellow-500" />
             </motion.div>
-            Bali's Authentic Pisang Sale Experience
+            {t('hero.badge')}
           </motion.div>
 
           {/* Main Title with Gradient */}
@@ -168,7 +170,7 @@ export default function Hero() {
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              Bali Pisang
+              {t('hero.title1')}
             </motion.span>
             <motion.span
               className="block text-gray-800 mt-2"
@@ -176,7 +178,7 @@ export default function Hero() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
             >
-              Sale
+              {t('hero.title2')}
             </motion.span>
           </motion.h1>
 
@@ -185,13 +187,12 @@ export default function Hero() {
             variants={itemVariant}
             className="text-xl lg:text-3xl text-gray-700 font-semibold leading-relaxed"
           >
-            The <motion.span
+            {t('hero.subtitle1')} <motion.span
               className="text-primary font-bold relative"
               whileHover={{ scale: 1.1 }}
             >
-              #1 Leading
-            </motion.span> Pisang <br />
-            Sale Producer in Bali
+              {t('hero.subtitle2')}
+            </motion.span> {t('hero.subtitle3')}
           </motion.h2>
 
           {/* Stats Row */}
@@ -200,9 +201,9 @@ export default function Hero() {
             className="flex flex-wrap gap-8 text-center lg:text-left"
           >
             {[
-              { number: "7+", label: "Years" },
-              { number: "2K+", label: "Happy Customers" },
-              { number: "100%", label: "Natural" }
+              { number: "7+", label: t('hero.stats.years') },
+              { number: "2K+", label: t('hero.stats.customers') },
+              { number: "100%", label: t('hero.stats.natural') }
             ].map((stat, index) => (
               <motion.div
                 key={index}
@@ -234,7 +235,7 @@ export default function Hero() {
               whileTap={{ scale: 0.98 }}
             >
               <span className="relative z-10 flex items-center gap-2">
-                View Menu
+                {t('hero.viewMenu')}
                 <motion.div
                   className="group-hover:translate-x-1 transition-transform"
                   animate={{ x: [0, 5, 0] }}
@@ -258,7 +259,7 @@ export default function Hero() {
               onClick={() => window.open('https://youtu.be/nERYMGpFgBs?si=4TzOv2PCjGlqhHCN', '_blank')}
             >
               <HiPlay className="group-hover:scale-110 transition-transform" />
-              Watch Story
+              {t('hero.watchStory')}
             </motion.button>
           </motion.div>
         </div>

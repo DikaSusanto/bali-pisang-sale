@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { HiLocationMarker, HiPhone, HiMail } from 'react-icons/hi';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariant = {
   hidden: { opacity: 0 },
@@ -36,6 +37,8 @@ const scrollToSection = (sectionId: string) => {
 };
 
 export default function Contact() {
+  const { t } = useLanguage();
+
   return (
     <motion.section
       variants={containerVariant}
@@ -47,7 +50,7 @@ export default function Contact() {
     >
       <motion.div variants={itemVariant} className="space-y-4">
         <h3 className="text-xl font-bold text-gray-800 mb-4">Socials</h3>
-        <span className="font-medium text-gray-600">Connect With Us</span>
+        <span className="font-medium text-gray-600"> {t('contact.connect')} </span>
         <div className="flex space-x-4 mt-6">
           <Link
             href="https://www.facebook.com/bali.pisangsale"
@@ -68,7 +71,7 @@ export default function Contact() {
 
       {/* Menu Links */}
       <motion.div variants={itemVariant} className="space-y-4">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Menu Links</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4">{t('contact.MenuLink')}</h3>
         <ul className="space-y-2">
           <li>
             <button
@@ -76,7 +79,7 @@ export default function Contact() {
               onClick={() => scrollToSection('home')}
               className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
-              Home
+              {t('nav.home')}
             </button>
           </li>
           <li>
@@ -85,7 +88,7 @@ export default function Contact() {
               onClick={() => scrollToSection('about')}
               className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
-              About
+              {t('nav.about')}
             </button>
           </li>
           <li>
@@ -94,7 +97,7 @@ export default function Contact() {
               onClick={() => scrollToSection('menu')}
               className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
-              Menu
+              {t('nav.menu')}
             </button>
           </li>
           <li>
@@ -103,7 +106,7 @@ export default function Contact() {
               onClick={() => scrollToSection('services')}
               className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
-              Service
+              {t('nav.service')}
             </button>
           </li>
           <li>
@@ -112,7 +115,7 @@ export default function Contact() {
               onClick={() => scrollToSection('order')}
               className="text-gray-800 hover:text-yellow-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
             >
-              Order
+              {t('nav.order')}
             </button>
           </li>
         </ul>
@@ -120,7 +123,7 @@ export default function Contact() {
 
       {/* Contact Information */}
       <motion.div variants={itemVariant} className="space-y-4 flex flex-col">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Contact</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4"> {t('contact.contactDetail')} </h3>
         <div className="flex items-start space-x-3 mb-2">
           <HiLocationMarker className="text-gray-800 text-base mt-1 flex-shrink-0" />
           <span className="text-gray-600 text-sm">

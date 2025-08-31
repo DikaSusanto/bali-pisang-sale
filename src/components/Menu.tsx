@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HiShoppingCart, HiStar } from 'react-icons/hi';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariant = {
   hidden: { opacity: 0 },
@@ -43,6 +44,7 @@ const cardVariant = {
 
 export default function Menu() {
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+  const { t } = useLanguage();
 
   const menuItems = [
     {
@@ -95,7 +97,7 @@ export default function Menu() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          Variety of Options to Choose From
+          {t('menu.sectionSubtitle')}
         </motion.h2>
         <motion.div
           className="w-24 h-1 bg-gradient-to-r from-primary to-yellow-400 mx-auto mt-4 rounded-full"

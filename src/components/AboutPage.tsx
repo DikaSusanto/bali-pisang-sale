@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { HiArrowLeft, HiHeart, HiStar, HiLocationMarker } from 'react-icons/hi';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariant = {
   hidden: { opacity: 0 },
@@ -42,29 +43,30 @@ const fadeInVariant = {
 
 export default function AboutPage() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const stats = [
-    { number: "7+", label: "Years Experience" },
-    { number: "2000+", label: "Happy Customers" },
-    { number: "100%", label: "Natural Ingredients" },
-    { number: "#1", label: "In Bali" }
+    { number: "7+", label: t('aboutPage.stats.experience') },
+    { number: "2000+", label: t('aboutPage.stats.customers') },
+    { number: "100%", label: t('aboutPage.stats.natural') },
+    { number: "#1", label: t('aboutPage.stats.rank') }
   ];
 
   const values = [
     {
       icon: <HiHeart className="text-3xl text-primary" />,
-      title: "Made with Love",
-      description: "Every batch of our Pisang Sale is crafted with passion and care, using traditional Balinese recipes passed down through generations."
+      title: t('aboutPage.value1.title'),
+      description: t('aboutPage.value1.description')
     },
     {
       icon: <HiStar className="text-3xl text-primary" />,
-      title: "Premium Quality",
-      description: "We source only the finest bananas from local Balinese farms, ensuring every bite delivers exceptional taste and quality."
+      title: t('aboutPage.value2.title'),
+      description: t('aboutPage.value2.description')
     },
     {
       icon: <HiLocationMarker className="text-3xl text-primary" />,
-      title: "Authentic Balinese",
-      description: "Rooted in Balinese tradition, our Pisang Sale represents the authentic flavors and cultural heritage of the Island of the Gods."
+      title: t('aboutPage.value3.title'),
+      description: t('aboutPage.value3.description')
     }
   ];
 
@@ -87,7 +89,7 @@ export default function AboutPage() {
           className="inline-flex items-center gap-2 text-primary hover:text-yellow-800 transition-colors duration-200"
         >
           <HiArrowLeft className="text-xl" />
-          <span className="font-medium">Back to Home</span>
+          <span className="font-medium">{t('aboutPage.backToHome')}</span>
         </Link>
       </motion.div>
 
@@ -101,9 +103,9 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
           <div className="space-y-6">
             <motion.div variants={itemVariant}>
-              <span className="text-primary font-medium text-lg">About Us</span>
+              <span className="text-primary font-medium text-lg">{t('aboutPage.aboutUs')}</span>
               <h1 className="text-4xl lg:text-6xl font-semibold text-gray-800 leading-tight mt-2">
-                The Story Behind Bali's Finest Pisang Sale
+                {t('aboutPage.heroTitle')}
               </h1>
             </motion.div>
 
@@ -111,9 +113,7 @@ export default function AboutPage() {
               variants={itemVariant}
               className="text-lg text-gray-600 leading-relaxed"
             >
-              For over a decade, we've been perfecting the art of creating Bali's most beloved Pisang Sale.
-              What started as a family recipe has grown into Bali's leading producer of this traditional delicacy,
-              bringing authentic flavors to thousands of satisfied customers.
+              {t('aboutPage.heroDescription')}
             </motion.p>
 
             <motion.div
@@ -156,9 +156,9 @@ export default function AboutPage() {
           variants={itemVariant}
           className="text-center mb-12"
         >
-          <span className="text-primary font-medium text-lg">Our Journey</span>
+          <span className="text-primary font-medium text-lg">{t('aboutPage.journey')}</span>
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mt-2">
-            From Family Recipe to Bali's Favorite
+            {t('aboutPage.journeyTitle')}
           </h2>
         </motion.div>
 
@@ -167,23 +167,9 @@ export default function AboutPage() {
             variants={fadeInVariant}
             className="space-y-6 text-gray-600 leading-relaxed text-lg"
           >
-            <p>
-              Our story begins in the heart of Bali, where traditional recipes were passed down through generations
-              of our family. What started in a small kitchen with our grandmother's secret blend of spices and
-              time-honored techniques has evolved into Bali's most trusted name in Pisang Sale production.
-            </p>
-
-            <p>
-              We believe that the best flavors come from the finest ingredients and traditional methods.
-              That's why we work directly with local banana farmers, selecting only the ripest, most flavorful
-              bananas that capture the essence of Bali's tropical climate.
-            </p>
-
-            <p>
-              Today, we're proud to serve thousands of customers who trust us to deliver the authentic taste
-              of Balinese Pisang Sale. Every batch is made with the same love, care, and attention to detail
-              that has defined our family's approach for generations.
-            </p>
+            <p>{t('aboutPage.story1')}</p>
+            <p>{t('aboutPage.story2')}</p>
+            <p>{t('aboutPage.story3')}</p>
           </motion.div>
         </div>
       </motion.section>
@@ -200,9 +186,9 @@ export default function AboutPage() {
           variants={itemVariant}
           className="text-center mb-12"
         >
-          <span className="text-primary font-medium text-lg">What We Stand For</span>
+          <span className="text-primary font-medium text-lg">{t('aboutPage.values')}</span>
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mt-2">
-            Our Core Values
+            {t('aboutPage.valuesTitle')}
           </h2>
         </motion.div>
 
@@ -236,11 +222,10 @@ export default function AboutPage() {
           className="text-center max-w-3xl mx-auto"
         >
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
-            Ready to Taste Tradition?
+            {t('aboutPage.ctaTitle')}
           </h2>
           <p className="text-lg text-gray-600 mb-8">
-            Experience the authentic flavors of Bali with our premium Pisang Sale.
-            Made with love, crafted with tradition.
+            {t('aboutPage.ctaDescription')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -249,14 +234,14 @@ export default function AboutPage() {
               onClick={() => handleSectionNavigate('menu')}
               className="inline-block bg-primary hover:bg-yellow-800 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium"
             >
-              View Our Menu
+              {t('aboutPage.viewMenu')}
             </button>
             <button
               type="button"
               onClick={() => handleSectionNavigate('order')}
               className="inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium"
             >
-              Contact Us
+              {t('aboutPage.contactUs')}
             </button>
           </div>
         </motion.div>

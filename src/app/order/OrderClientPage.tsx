@@ -2,23 +2,33 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { FaPlus, FaMinus, FaTrash } from "react-icons/fa";
-import { HiArrowLeft, HiInformationCircle } from "react-icons/hi";
-import Link from "next/link";
-import { Product } from "@prisma/client";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { HiArrowLeft, HiInformationCircle } from "react-icons/hi";
+import { FaPlus, FaMinus, FaTrash } from "react-icons/fa";
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Interfaces
+interface Product {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    weight: string;
+}
+
 interface CartItem {
     productId: string;
     quantity: number;
 }
+
 interface OrderClientPageProps {
     products: Product[];
 }
+
 interface AreaOption {
     id: string;
     name: string;
@@ -39,46 +49,51 @@ const formatWeight = (weightString: string) => {
 };
 
 // Pre-Order Information Banner Component
-const PreOrderInfoBanner = () => (
-    <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8"
-    >
-        <div className="flex items-start gap-4">
-            <HiInformationCircle className="text-blue-500 text-2xl mt-1 flex-shrink-0" />
-            <div>
-                <h3 className="font-semibold text-blue-900 mb-3">How Our Pre-Order System Works</h3>
-                <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                        <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">1</span>
-                        <p className="text-sm text-blue-800"><strong>Place Pre-Order:</strong> Fill out your details below (shipping costs shown are estimates)</p>
+const PreOrderInfoBanner = () => {
+    const { t } = useLanguage();
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8"
+        >
+            <div className="flex items-start gap-4">
+                <HiInformationCircle className="text-blue-500 text-2xl mt-1 flex-shrink-0" />
+                <div>
+                    <h3 className="font-semibold text-blue-900 mb-3">{t('order.infoTitle')}</h3>
+                    <div className="space-y-2">
+                        <div className="flex items-start gap-2">
+                            <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">1</span>
+                            <p className="text-sm text-blue-800"><strong>{t('order.step1')}</strong></p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                            <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">2</span>
+                            <p className="text-sm text-blue-800"><strong>{t('order.step2')}</strong></p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                            <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">3</span>
+                            <p className="text-sm text-blue-800"><strong>{t('order.step3')}</strong></p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                            <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">4</span>
+                            <p className="text-sm text-blue-800"><strong>{t('order.step4')}</strong></p>
+                        </div>
                     </div>
-                    <div className="flex items-start gap-2">
-                        <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">2</span>
-                        <p className="text-sm text-blue-800"><strong>We Confirm:</strong> We'll verify product availability & calculate final shipping costs</p>
+                    <div className="mt-4 pt-3 border-t border-blue-200">
+                        <p className="text-xs text-blue-700">
+                            💡 <strong>{t('order.noPaymentNote')}</strong>
+                        </p>
                     </div>
-                    <div className="flex items-start gap-2">
-                        <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">3</span>
-                        <p className="text-sm text-blue-800"><strong>Payment Link:</strong> You'll receive a secure payment link via email within 24 hours</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                        <span className="bg-blue-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">4</span>
-                        <p className="text-sm text-blue-800"><strong>Safe Delivery:</strong> After payment, we'll carefully package and ship your order</p>
-                    </div>
-                </div>
-                <div className="mt-4 pt-3 border-t border-blue-200">
-                    <p className="text-xs text-blue-700">
-                        💡 <strong>No payment required now</strong> - you'll only pay after we confirm your order details!
-                    </p>
                 </div>
             </div>
-        </div>
-    </motion.div>
-);
+        </motion.div>
+    );
+};
 
 export default function OrderClientPage({ products }: OrderClientPageProps) {
     const router = useRouter();
+    const { t, language } = useLanguage();
     const [customer, setCustomer] = useState({ firstName: "", lastName: "", email: "", phone: "", address: "" });
     const [cart, setCart] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -212,9 +227,11 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
             setCart((prevCart) => [...prevCart, { productId, quantity: 1 }]);
         }
     };
+
     const handleQuantityChange = (productId: string, amount: number) => {
         setCart((prevCart) => prevCart.map((item) => item.productId === productId ? { ...item, quantity: Math.max(1, item.quantity + amount) } : item));
     };
+
     const handleRemoveItem = (productId: string) => {
         setCart((prevCart) => prevCart.filter((item) => item.productId !== productId));
     };
@@ -222,20 +239,20 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
     const validateForm = () => {
         const newErrors = { firstName: "", lastName: "", email: "", phone: "", address: "" };
         let isValid = true;
-        if (!customer.firstName.trim()) { newErrors.firstName = "First name is required."; isValid = false; }
-        if (!customer.lastName.trim()) { newErrors.lastName = "Last name is required."; isValid = false; }
-        if (!customer.email.trim()) { newErrors.email = "Email is required."; isValid = false; }
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) { newErrors.email = "Please enter a valid email address."; isValid = false; }
-        if (!customer.address.trim()) { newErrors.address = "Street address is required."; isValid = false; }
-        if (!customer.phone.trim()) { newErrors.phone = "Phone number is required."; isValid = false; }
-        if (!selectedSubdistrictId) { setShippingError("Please select a complete shipping destination."); isValid = false; }
+        if (!customer.firstName.trim()) { newErrors.firstName = t('validation.firstNameRequired'); isValid = false; }
+        if (!customer.lastName.trim()) { newErrors.lastName = t('validation.lastNameRequired'); isValid = false; }
+        if (!customer.email.trim()) { newErrors.email = t('validation.emailRequired'); isValid = false; }
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) { newErrors.email = t('validation.emailInvalid'); isValid = false; }
+        if (!customer.address.trim()) { newErrors.address = t('validation.addressRequired'); isValid = false; }
+        if (!customer.phone.trim()) { newErrors.phone = t('validation.phoneRequired'); isValid = false; }
+        if (!selectedSubdistrictId) { setShippingError(t('validation.destinationRequired')); isValid = false; }
         setErrors(newErrors);
         return isValid;
     };
 
     const handleCalculateShipping = async () => {
         if (!selectedSubdistrictId || cart.length === 0 || totalWeight === 0) {
-            setShippingError("Please select a complete destination and add items to your cart.");
+            setShippingError(t('validation.destinationAndCartRequired'));
             return;
         }
         setIsCalculatingShipping(true);
@@ -278,10 +295,10 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
         let hasError = false;
         if (!validateForm()) { hasError = true; }
         if (cart.length === 0) {
-            setShippingError("Your cart is empty.");
+            setShippingError(t('validation.cartEmpty'));
             hasError = true;
         } else if (estimatedShippingCost === null) {
-            setShippingError("Please calculate a shipping cost estimate.");
+            setShippingError(t('validation.calculateShippingRequired'));
             hasError = true;
         }
         if (hasError) return;
@@ -299,7 +316,8 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                 return { id: product?.id, name: product?.name, price: product?.price, quantity: item.quantity };
             }),
             customer: { ...customer, address: fullAddress },
-            shippingProvider: "JNE"
+            shippingProvider: "JNE",
+            customerLanguage: language
         };
 
         try {
@@ -328,13 +346,13 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
             className="bg-stone-50 px-4 py-16 lg:px-24"
         >
             <div className="container mx-auto">
-                <h1 className="text-4xl text-center font-bold text-primary mb-12">Pre-Order Checkout</h1>
+                <h1 className="text-4xl text-center font-bold text-primary mb-12">{t('order.title')}</h1>
                 <Link
                     href="/"
                     className="inline-flex items-center gap-2 text-primary hover:text-yellow-800 transition-colors duration-200 mb-8"
                 >
                     <HiArrowLeft className="text-xl" />
-                    <span className="font-medium">Back to Home</span>
+                    <span className="font-medium">{t('order.backToHome')}</span>
                 </Link>
 
                 {/* Information Banner */}
@@ -342,39 +360,39 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
 
                 <form onSubmit={handleOrderSubmit} noValidate className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 bg-white p-8 rounded-xl shadow-md order-2 lg:order-1">
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Customer & Shipping Information</h2>
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-6">{t('order.customerInfo')}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label htmlFor="firstName" className="block text-gray-700 font-medium mb-2">First Name</label>
+                                <label htmlFor="firstName" className="block text-gray-700 font-medium mb-2">{t('order.firstName')}</label>
                                 <input type="text" id="firstName" name="firstName" value={customer.firstName} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" required />
                                 {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
                             </div>
                             <div>
-                                <label htmlFor="lastName" className="block text-gray-700 font-medium mb-2">Last Name</label>
+                                <label htmlFor="lastName" className="block text-gray-700 font-medium mb-2">{t('order.lastName')}</label>
                                 <input type="text" id="lastName" name="lastName" value={customer.lastName} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" required />
                                 {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
                             </div>
                             <div className="md:col-span-2">
-                                <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
+                                <label htmlFor="email" className="block text-gray-700 font-medium mb-2">{t('order.email')}</label>
                                 <input type="email" id="email" name="email" value={customer.email} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" required />
                                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                             </div>
                             <div className="md:col-span-2">
-                                <label htmlFor="phone" className="block text-gray-700 font-medium mb-2">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" value={customer.phone} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" placeholder="e.g., 081234567890" required />
+                                <label htmlFor="phone" className="block text-gray-700 font-medium mb-2">{t('order.phone')}</label>
+                                <input type="tel" id="phone" name="phone" value={customer.phone} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" placeholder={t('order.phonePlaceholder')} required />
                                 {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                             </div>
                             <div className="md:col-span-2">
-                                <label htmlFor="address" className="block text-gray-700 font-medium mb-2">Street Address</label>
-                                <input type="text" id="address" name="address" value={customer.address} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" placeholder="e.g., Jalan Pantai Kuta No. 123" required />
+                                <label htmlFor="address" className="block text-gray-700 font-medium mb-2">{t('order.streetAddress')}</label>
+                                <input type="text" id="address" name="address" value={customer.address} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" placeholder={t('order.streetPlaceholder')} required />
                                 {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                             </div>
 
                             {/* CASCADED DROPDOWNS */}
                             <div>
-                                <label htmlFor="province" className="block text-gray-700 font-medium mb-2">Province</label>
+                                <label htmlFor="province" className="block text-gray-700 font-medium mb-2">{t('order.province')}</label>
                                 <select id="province" value={selectedProvinceId} onChange={(e) => setSelectedProvinceId(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" required>
-                                    <option value="">Choose Province</option>
+                                    <option value="">{t('order.chooseProvince')}</option>
                                     {provinces.map(prov => (
                                         <option key={prov.id} value={prov.id}>{prov.name}</option>
                                     ))}
@@ -382,9 +400,9 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                             </div>
 
                             <div>
-                                <label htmlFor="city" className="block text-gray-700 font-medium mb-2">City</label>
+                                <label htmlFor="city" className="block text-gray-700 font-medium mb-2">{t('order.city')}</label>
                                 <select id="city" value={selectedCityId} onChange={(e) => setSelectedCityId(e.target.value)} disabled={!selectedProvinceId} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" required>
-                                    <option value="">Choose City</option>
+                                    <option value="">{t('order.chooseCity')}</option>
                                     {cities.map(city => (
                                         <option key={city.id} value={city.id}>{city.name}</option>
                                     ))}
@@ -392,13 +410,13 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                             </div>
 
                             <div className="md:col-span-2">
-                                <label htmlFor="subdistrict" className="block text-gray-700 font-medium mb-2">Subdistrict (Kecamatan)</label>
+                                <label htmlFor="subdistrict" className="block text-gray-700 font-medium mb-2">{t('order.subdistrict')}</label>
                                 <select id="subdistrict" value={selectedSubdistrictId} onChange={(e) => {
                                     setSelectedSubdistrictId(e.target.value);
                                     const selectedOption = subdistricts.find(sd => sd.id === e.target.value);
                                     if (selectedOption) setSelectedSubdistrictName(selectedOption.name);
                                 }} disabled={!selectedCityId} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500" required>
-                                    <option value="">Choose Subdistrict</option>
+                                    <option value="">{t('order.chooseSubdistrict')}</option>
                                     {subdistricts.map(sd => (
                                         <option key={sd.id} value={sd.id}>{sd.name}</option>
                                     ))}
@@ -407,19 +425,19 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                         </div>
 
                         <div className="border-t pt-6 mt-6">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-4">Shipping Estimate</h3>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-4">{t('order.shippingEstimate')}</h3>
                             <button type="button" onClick={handleCalculateShipping} disabled={isCalculatingShipping || !selectedSubdistrictId || cart.length === 0} className="w-full bg-primary text-white font-bold py-2 px-4 rounded-lg disabled:bg-gray-400">
-                                {isCalculatingShipping ? 'Calculating...' : 'Calculate Estimated Shipping'}
+                                {isCalculatingShipping ? t('order.calculating') : t('order.calculateShipping')}
                             </button>
-                            <p className="text-sm text-gray-600 mt-2">Total Weight: {totalWeight}g</p>
+                            <p className="text-sm text-gray-600 mt-2">{t('order.totalWeight')}: {totalWeight}g</p>
                             {totalWeight > 0 && totalWeight < 1000 && (
                                 <p className="text-xs text-gray-500 mt-2">
-                                    Shipping is calculated with a minimum weight of 1kg (1000g), per courier policy.
+                                    {t('order.minWeightNote')}
                                 </p>
                             )}
                             {estimatedShippingCost !== null && (
                                 <div className="mt-4 p-3 border rounded-lg bg-gray-50">
-                                    <p className="text-sm text-gray-600">Average shipping cost estimate:</p>
+                                    <p className="text-sm text-gray-600">{t('order.avgShippingCost')}</p>
                                     <p className="font-semibold text-lg">{formatCurrency(estimatedShippingCost)}</p>
                                 </div>
                             )}
@@ -428,11 +446,11 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                     </div>
 
                     <div className="lg:col-span-1 bg-white p-8 rounded-xl shadow-md order-1 lg:order-2">
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Your Order</h2>
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-6">{t('order.yourOrder')}</h2>
                         <div>
-                            <label htmlFor="product-adder" className="block text-gray-700 font-medium mb-2">Add a Product</label>
+                            <label htmlFor="product-adder" className="block text-gray-700 font-medium mb-2">{t('order.addProduct')}</label>
                             <select id="product-adder" value="" onChange={(e) => handleAddProduct(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-yellow-500 focus:border-yellow-500">
-                                <option value="">-- Select a product to add --</option>
+                                <option value="">{t('order.selectProduct')}</option>
                                 {products.map((product) => (
                                     <option key={product.id} value={product.id} disabled={cart.some(item => item.productId === product.id)}>
                                         {product.name}
@@ -441,7 +459,7 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                             </select>
                         </div>
                         <div className="mt-6 space-y-6">
-                            {cart.length === 0 ? (<p className="text-gray-500 text-center py-4">Your cart is empty.</p>) : (
+                            {cart.length === 0 ? (<p className="text-gray-500 text-center py-4">{t('order.cartEmpty')}</p>) : (
                                 cart.map(item => {
                                     const product = products.find(p => p.id === item.productId);
                                     if (!product) return null;
@@ -468,21 +486,21 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                         {cart.length > 0 && (
                             <div className="mt-6 pt-6 border-t space-y-2 text-gray-700">
                                 <div className="flex justify-between">
-                                    <span>Subtotal</span>
+                                    <span>{t('order.subtotal')}</span>
                                     <span>{formatCurrency(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span>Service Fee</span>
+                                    <span>{t('order.serviceFee')}</span>
                                     <span>{formatCurrency(serviceFee)}</span>
                                 </div>
                                 {estimatedShippingCost !== null && (
                                     <div className="flex justify-between">
-                                        <span>Shipping (est.)</span>
+                                        <span>{t('order.shippingEst')}</span>
                                         <span>{formatCurrency(estimatedShippingCost)}</span>
                                     </div>
                                 )}
                                 <div className="pt-2 border-t mt-2 flex justify-between font-bold text-lg text-gray-900">
-                                    <span>Grand Total (est.)</span>
+                                    <span>{t('order.grandTotal')}</span>
                                     <span>{formatCurrency(grandTotal)}</span>
                                 </div>
                                 {/* Show generic order error here */}
@@ -490,7 +508,7 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                                     <p className="text-red-600 text-sm mt-3">{orderError}</p>
                                 )}
                                 <button type="submit" disabled={isLoading} className="w-full mt-6 bg-primary text-white font-bold py-3 px-6 rounded-lg transition-colors hover:opacity-90 disabled:bg-gray-400">
-                                    {isLoading ? 'Placing Pre-Order...' : 'Place Pre-Order'}
+                                    {isLoading ? t('order.placingPreOrder') : t('order.placePreOrder')}
                                 </button>
                             </div>
                         )}

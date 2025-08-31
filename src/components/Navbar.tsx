@@ -5,11 +5,14 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiMenu, HiX, HiHome, HiInformationCircle, HiCollection, HiCog, HiShoppingCart } from 'react-icons/hi'
+import LanguageToggle from './LanguageToggle'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const router = useRouter()
+  const { t } = useLanguage()
 
   // Track scroll position for navbar background
   useEffect(() => {
@@ -59,11 +62,11 @@ export default function Navbar() {
   }
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: HiHome },
-    { id: 'about', label: 'About', icon: HiInformationCircle },
-    { id: 'menu', label: 'Menu', icon: HiCollection },
-    { id: 'services', label: 'Service', icon: HiCog },
-    { id: 'order', label: 'Order', icon: HiShoppingCart },
+    { id: 'home', label: t('nav.home'), icon: HiHome },
+    { id: 'about', label: t('nav.about'), icon: HiInformationCircle },
+    { id: 'menu', label: t('nav.menu'), icon: HiCollection },
+    { id: 'services', label: t('nav.service'), icon: HiCog },
+    { id: 'order', label: t('nav.order'), icon: HiShoppingCart },
   ]
 
   return (
@@ -107,33 +110,38 @@ export default function Navbar() {
           </motion.div>
 
           {/* Desktop Menu */}
-          <nav className="hidden md:flex items-center space-x-2">
-            {navItems.map((item, index) => (
-              <motion.button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className="group relative text-gray-700 hover:text-primary font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:bg-primary/5"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="flex items-center gap-2">
-                  <item.icon className="text-lg opacity-70 group-hover:opacity-100 transition-opacity" />
-                  {item.label}
-                </span>
+          <div className="hidden md:flex items-center space-x-4">
+            <nav className="flex items-center space-x-2">
+              {navItems.map((item, index) => (
+                <motion.button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className="group relative text-gray-700 hover:text-primary font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:bg-primary/5"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="flex items-center gap-2">
+                    <item.icon className="text-lg opacity-70 group-hover:opacity-100 transition-opacity" />
+                    {item.label}
+                  </span>
 
-                {/* Hover underline effect */}
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                  initial={{ scaleX: 0 }}
-                  whileHover={{ scaleX: 1 }}
-                  transition={{ duration: 0.2 }}
-                />
-              </motion.button>
-            ))}
-          </nav>
+                  {/* Hover underline effect */}
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </motion.button>
+              ))}
+            </nav>
+            
+            {/* Language Toggle */}
+            <LanguageToggle />
+          </div>
 
           {/* Mobile Menu Button */}
           <motion.button
@@ -179,7 +187,6 @@ export default function Navbar() {
               {/* Menu Header with close button */}
               <div className="p-6 border-b border-gray-200/50 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  {/* Fixed the logo aspect ratio here */}
                   <Image
                     src="/img/logo sale.png"
                     alt="Logo"
@@ -189,10 +196,8 @@ export default function Navbar() {
                   />
                   <div>
                     <h2 className="font-bold text-primary">Bali Pisang Sale</h2>
-                    {/* Removed "Menu Navigation" text */}
                   </div>
                 </div>
-                {/* Added a dedicated "X" close button */}
                 <motion.button
                   onClick={closeMenu}
                   className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
@@ -223,6 +228,11 @@ export default function Navbar() {
                     </div>
                   </motion.button>
                 ))}
+                
+                {/* Mobile Language Toggle */}
+                <div className="px-4 py-2">
+                  <LanguageToggle />
+                </div>
               </div>
 
               {/* Mobile CTA */}
@@ -235,7 +245,7 @@ export default function Navbar() {
                   transition={{ delay: 0.6 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Order Now
+                  {t('nav.orderNow')}
                 </motion.button>
               </div>
             </motion.nav>

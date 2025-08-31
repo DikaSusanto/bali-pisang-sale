@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HiShieldCheck, HiHeart } from 'react-icons/hi';
 import { FaLeaf } from 'react-icons/fa';
-
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariant = {
   hidden: { opacity: 0 },
@@ -46,10 +46,12 @@ const badgeVariant = {
 };
 
 export default function About() {
+  const { t } = useLanguage();
+  
   const features = [
-    { icon: <HiShieldCheck />, text: "100% Hygienic" },
-    { icon: <FaLeaf />, text: "No Preservatives" },
-    { icon: <HiHeart />, text: "Unsweetened" }
+    { icon: <HiShieldCheck />, text: t('about.feature1') },
+    { icon: <FaLeaf />, text: t('about.feature2') },
+    { icon: <HiHeart />, text: t('about.feature3') }
   ];
 
   return (
@@ -132,7 +134,7 @@ export default function About() {
           >
             <FaLeaf />
           </motion.div>
-          About Our Quality
+          {t('about.badge')}
         </motion.div>
 
         {/* Main Title */}
@@ -144,10 +146,10 @@ export default function About() {
             className="bg-gradient-to-r from-primary to-yellow-700 bg-clip-text text-transparent"
             whileHover={{ scale: 1.02 }}
           >
-            Pure & Natural
+            {t('about.title1')}
           </motion.span>
           <br />
-          Pisang Sale
+          {t('about.title2')}
         </motion.h2>
 
         {/* Feature Icons Row - Now consistently centered */}
@@ -179,12 +181,12 @@ export default function About() {
           variants={itemVariant}
           className="text-gray-600 leading-relaxed max-w-md mx-auto"
         >
-          We guarantee our products to be hygienic with no preservatives and additional sweeteners.
+          {t('about.description')}
           <motion.span
             className="text-primary font-medium"
             whileHover={{ scale: 1.05 }}
           >
-            {" "}Pure quality, authentic taste.
+            {" "}{t('about.descriptionHighlight')}
           </motion.span>
         </motion.p>
 
@@ -195,7 +197,7 @@ export default function About() {
             className="group relative inline-flex items-center gap-2 bg-primary hover:bg-yellow-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-lg overflow-hidden"
           >
             <span className="relative z-10 flex items-center gap-2">
-              Learn More
+              {t('about.learnMore')}
               <motion.div
                 className="group-hover:translate-x-1 transition-transform"
                 animate={{ x: [0, 3, 0] }}

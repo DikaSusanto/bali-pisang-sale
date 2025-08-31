@@ -4,6 +4,7 @@ import { HiCube, HiTruck, HiMail, HiArrowRight } from 'react-icons/hi';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const containerVariant = {
   hidden: { opacity: 0 },
@@ -42,13 +43,14 @@ const serviceCardVariant = {
 
 export default function Services() {
   const [hoveredService, setHoveredService] = useState<number | null>(null);
+  const { t } = useLanguage();
 
   const services = [
     {
       id: 1,
       icon: HiCube,
-      title: 'Place Pre-Order',
-      description: 'Submit your order details with estimated shipping costs. No payment required yet!',
+      title: t('service.step1.title'),
+      description: t('service.step1.description'),
       color: 'from-blue-400 to-blue-600',
       bgColor: 'bg-blue-50',
       delay: 0.2,
@@ -56,8 +58,8 @@ export default function Services() {
     {
       id: 2,
       icon: HiMail,
-      title: 'Order Confirmation',
-      description: 'We confirm product availability & final shipping costs, then email you a secure payment link within 24 hours',
+      title: t('service.step2.title'),
+      description: t('service.step2.description'),
       color: 'from-purple-400 to-purple-600',
       bgColor: 'bg-purple-50',
       delay: 0.4,
@@ -65,8 +67,8 @@ export default function Services() {
     {
       id: 3,
       icon: HiTruck,
-      title: 'Safe Delivery',
-      description: 'Once payment is completed, we carefully package and ship your fresh Pisang Sale to your doorstep',
+      title: t('service.step3.title'),
+      description: t('service.step3.description'),
       color: 'from-green-400 to-green-600',
       bgColor: 'bg-green-50',
       delay: 0.6,
@@ -90,7 +92,7 @@ export default function Services() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          How It Works
+          {t('service.sectionTitle')}
         </motion.span>
         <motion.h2
           className="text-2xl lg:text-4xl font-bold text-gray-800 mt-2"
@@ -98,7 +100,7 @@ export default function Services() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          Our Pre-Order Process Made Simple
+          {t('service.sectionSubtitle')}
         </motion.h2>
         <motion.div
           className="w-24 h-1 bg-gradient-to-r from-primary to-yellow-400 mx-auto mt-4 rounded-full"
@@ -256,7 +258,7 @@ export default function Services() {
           href="/how-it-works"
           className="group inline-flex items-center gap-2 text-primary hover:text-yellow-800 transition-colors duration-200 font-medium"
         >
-          Learn more about our process
+          {t('service.learnMore')}
           <motion.div
             animate={{ x: [0, 5, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
