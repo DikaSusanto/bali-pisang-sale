@@ -36,11 +36,9 @@ export default async function AdminOrdersPage({
   }>;
 }) {
   const session = await getServerSession(authOptions);
-
   if (!session) {
     redirect("/login");
   }
-
   const params = searchParams ? await searchParams : {};
   const { status, startDate, endDate, page, pageSize } = params || {};
   const currentPage = parseInt(page || "1", 10);

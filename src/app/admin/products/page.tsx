@@ -15,15 +15,13 @@ export const metadata: Metadata = {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: { page?: string; pageSize?: string };
+  searchParams?: Promise<{ page?: string; pageSize?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     redirect("/login");
   }
-
-  // Safely parse search parameters
-  const params = await searchParams;
+  const params = searchParams ? await searchParams : {};
   const page = parseInt(params.page || "1", 10);
   const pageSize = parseInt(params.pageSize || "10", 10);
 

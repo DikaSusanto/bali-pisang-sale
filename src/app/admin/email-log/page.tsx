@@ -10,14 +10,16 @@ export const metadata: Metadata = {
   description: 'View and manage all email logs in the admin panel.',
 };
 
-export default async function EmailLogDashboard({ searchParams }: { searchParams?: any }) {
+export default async function EmailLogDashboard({
+  searchParams,
+}: {
+  searchParams?: Promise<{ page?: string; pageSize?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session) {
     redirect("/login");
   }
-
-  // Default pagination/filter values
-  const params = await searchParams;
+  const params = searchParams ? await searchParams : {};
   const page = parseInt(params.page || "1", 10);
   const pageSize = parseInt(params.pageSize || "10", 10);
 

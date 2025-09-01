@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'View the current status and details of your Bali Pisang Sale order, including payment, shipping, and fulfillment updates.',
 };
 
-export default async function OrderStatusPage({ params }: { params: { token: string } }) {
+export default async function OrderStatusPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
 
   // Fetch the order from the database
