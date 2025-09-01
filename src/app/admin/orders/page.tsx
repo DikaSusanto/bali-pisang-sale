@@ -27,13 +27,13 @@ interface AdminOrdersPageProps {
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     status?: string;
     startDate?: string;
     endDate?: string;
     page?: string;
     pageSize?: string;
-  };
+  }>;
 }) {
   const session = await getServerSession(authOptions);
 
@@ -41,7 +41,8 @@ export default async function AdminOrdersPage({
     redirect("/login");
   }
 
-  const { status, startDate, endDate, page, pageSize } = searchParams || {};
+  const params = searchParams ? await searchParams : {};
+  const { status, startDate, endDate, page, pageSize } = params || {};
   const currentPage = parseInt(page || "1", 10);
   const itemsPerPage = parseInt(pageSize || "10", 10);
 
