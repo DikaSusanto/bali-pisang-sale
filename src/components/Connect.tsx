@@ -1,6 +1,7 @@
 "use client";
 
-import { HiPhone, HiGlobe, HiArrowRight } from 'react-icons/hi';
+import { HiPhone, HiArrowRight } from 'react-icons/hi';
+import { FaGlobe } from 'react-icons/fa';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,7 +16,7 @@ export default function Connect() {
       id: 'website',
       title: t('connect.preOrder'),
       description: t('connect.preOrderDesc'),
-      icon: HiGlobe,
+      icon: FaGlobe,
       action: () => window.location.href = '/order',
       color: 'bg-primary hover:bg-yellow-800',
     },
