@@ -1,6 +1,6 @@
 "use client";
 
-import { HiPhone, HiArrowRight } from 'react-icons/hi';
+import { HiPhone, HiArrowRight, HiCog } from 'react-icons/hi';
 import { FaGlobe } from 'react-icons/fa';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -17,8 +17,13 @@ export default function Connect() {
       title: t('connect.preOrder'),
       description: t('connect.preOrderDesc'),
       icon: FaGlobe,
-      action: () => window.location.href = '/order',
-      color: 'bg-primary hover:bg-yellow-800',
+      action: () => {
+        // Show development modal/notification instead of navigating
+        alert(t('connect.alertDevelopment'));
+      },
+      color: 'bg-gray-500 hover:bg-gray-600', // Changed to indicate unavailable
+      status: 'development',
+      statusText: 'Coming Soon'
     },
     {
       id: 'social',
@@ -27,31 +32,33 @@ export default function Connect() {
       icon: HiPhone,
       action: () => window.open('https://wa.me/6281353018130', '_blank'),
       color: 'bg-amber-700 hover:bg-amber-800',
+      status: 'active',
+      statusText: 'Available Now'
     },
   ];
 
   // Partners data with logo placeholders - exactly 4 items
   const partners = [
-    { 
-      name: 'Pepito', 
+    {
+      name: 'Pepito',
       type: 'Supermarket',
       logo: '/logos/pepito.png',
       fallbackColor: 'from-red-400 to-red-600'
     },
-    { 
-      name: 'Happy Mie', 
+    {
+      name: 'Happy Mie',
       type: 'Restaurant',
       logo: '/logos/happy-mie.jpg',
       fallbackColor: 'from-orange-400 to-orange-600'
     },
-    { 
-      name: 'Joger', 
+    {
+      name: 'Joger',
       type: 'Souvenir Shop',
       logo: '/logos/joger.png',
       fallbackColor: 'from-green-400 to-green-600'
     },
-    { 
-      name: 'Griya Bugar', 
+    {
+      name: 'Griya Bugar',
       type: 'Shiatsu and Spa',
       logo: '/logos/griya-bugar.png',
       fallbackColor: 'from-blue-400 to-blue-600'
@@ -64,7 +71,7 @@ export default function Connect() {
   // Component to handle logo with fallback - bigger size, no frame
   const PartnerLogo = ({ partner }: { partner: typeof partners[0] }) => {
     const [imageError, setImageError] = useState(false);
-    
+
     if (imageError) {
       // Fallback to gradient with first letter - bigger size
       return (
@@ -113,32 +120,56 @@ export default function Connect() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
           {orderingOptions.map((option, index) => {
-            const IconComponent = option.icon;
+            const IconComponent = option.status === 'development' ? HiCog : option.icon;
+            const isInDevelopment = option.status === 'development';
+
             return (
               <motion.button
                 key={option.id}
-                className={`group relative ${option.color} text-white p-6 rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl overflow-hidden`}
+                className={`group relative ${option.color} text-white p-6 rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl overflow-hidden ${isInDevelopment ? 'cursor-not-allowed opacity-75' : ''}`}
                 onClick={option.action}
                 onMouseEnter={() => setHoveredOrderButton(option.id)}
                 onMouseLeave={() => setHoveredOrderButton(null)}
-                whileHover={{ scale: 1.02, y: -2 }}
+                whileHover={{ scale: isInDevelopment ? 1.01 : 1.02, y: isInDevelopment ? -1 : -2 }}
                 whileTap={{ scale: 0.98 }}
                 initial={{ opacity: 0, x: index === 0 ? -20 : 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1 + index * 0.2, duration: 1 }}
               >
-                {/* Background Animation */}
+                {/* Status Badge */}
+                {isInDevelopment && (
+                  <div className="absolute top-3 right-3 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-medium z-20">
+                    {option.statusText}
+                  </div>
+                )}
+
+                {/* Background Animation - different for development */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5"
+                  className={`absolute inset-0 ${isInDevelopment ? 'bg-gradient-to-r from-yellow-200/20 to-yellow-100/10' : 'bg-gradient-to-r from-white/10 to-white/5'}`}
                   initial={{ x: '-100%' }}
                   whileHover={{ x: '100%' }}
-                  transition={{ duration: 0.6 }}
+                  transition={{ duration: isInDevelopment ? 1.2 : 0.6 }}
                 />
 
                 <div className="relative z-10 flex items-center justify-between">
                   <div className="text-left">
-                    <div className="text-lg font-bold mb-1">{option.title}</div>
-                    <div className="text-sm opacity-90">{option.description}</div>
+                    <div className="text-lg font-bold mb-1 flex items-center gap-2">
+                      {option.title}
+                      {isInDevelopment && (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        >
+                          <HiCog className="text-sm text-yellow-300" />
+                        </motion.div>
+                      )}
+                    </div>
+                    <div className="text-sm opacity-90">
+                      {isInDevelopment
+                        ? t('connect.devBadge')
+                        : option.description
+                      }
+                    </div>
                   </div>
 
                   <motion.div
@@ -148,29 +179,70 @@ export default function Connect() {
                     }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <IconComponent className="text-2xl" />
                     <motion.div
-                      animate={{
-                        x: hoveredOrderButton === option.id ? [0, 5, 0] : 0
-                      }}
-                      transition={{ duration: 1, repeat: Infinity }}
+                      animate={isInDevelopment ? { rotate: 360 } : {}}
+                      transition={isInDevelopment ? { duration: 2, repeat: Infinity, ease: "linear" } : {}}
                     >
-                      <HiArrowRight className="text-xl" />
+                      <IconComponent className="text-2xl" />
                     </motion.div>
+                    {!isInDevelopment && (
+                      <motion.div
+                        animate={{
+                          x: hoveredOrderButton === option.id ? [0, 5, 0] : 0
+                        }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        <HiArrowRight className="text-xl" />
+                      </motion.div>
+                    )}
                   </motion.div>
                 </div>
 
                 {/* Button Ripple Effect */}
                 <motion.div
-                  className="absolute inset-0 bg-white/20 rounded-xl"
+                  className={`absolute inset-0 ${isInDevelopment ? 'bg-yellow-200/20' : 'bg-white/20'} rounded-xl`}
                   initial={{ scale: 0, opacity: 0 }}
                   whileHover={{ scale: 2, opacity: 0.1 }}
                   transition={{ duration: 0.4 }}
                 />
+
+                {/* Development Pattern Overlay */}
+                {isInDevelopment && (
+                  <div className="absolute inset-0 opacity-5">
+                    <div className="w-full h-full bg-repeat" style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M10 10l-5.5-5.5 1.41-1.41L10 7.17l4.09-4.08 1.41 1.41L10 10z'/%3E%3C/g%3E%3C/svg%3E")`,
+                      backgroundSize: '20px 20px'
+                    }} />
+                  </div>
+                )}
               </motion.button>
             );
           })}
         </div>
+
+        {/* Development Notice */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ amount: 0.01 }}
+          transition={{ delay: 0.2, duration: 0.8 }}
+          className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-12 text-center"
+        >
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            >
+              <HiCog className="text-yellow-600" />
+            </motion.div>
+            <span className="text-yellow-800 font-medium text-sm">
+              {t('connect.devNoticeTitle')}
+            </span>
+          </div>
+          <p className="text-yellow-700 text-xs">
+            {t('connect.devNoticeDesc')}
+          </p>
+        </motion.div>
 
         {/* Partners Section */}
         <motion.div
@@ -180,7 +252,7 @@ export default function Connect() {
           transition={{ delay: 0.4, duration: 1 }}
           className="text-center"
         >
-          <motion.h4 
+          <motion.h4
             className="text-lg font-semibold text-gray-800 mb-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -188,7 +260,7 @@ export default function Connect() {
           >
             {t('connect.alsoAvailable')}
           </motion.h4>
-          <motion.p 
+          <motion.p
             className="text-gray-600 text-sm mb-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -202,12 +274,12 @@ export default function Connect() {
             {/* Gradient Overlays */}
             <div className="absolute left-0 top-0 w-12 h-full bg-gradient-to-r from-white to-transparent z-10" />
             <div className="absolute right-0 top-0 w-12 h-full bg-gradient-to-l from-white to-transparent z-10" />
-            
+
             {/* Moving Belt */}
             <motion.div
               className="flex gap-12 items-center"
               animate={{
-                x: [0, -800], 
+                x: [0, -800],
               }}
               transition={{
                 duration: 15, // Slower for better visibility

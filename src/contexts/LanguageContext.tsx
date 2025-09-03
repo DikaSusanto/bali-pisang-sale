@@ -169,6 +169,12 @@ const translations = {
     'connect.directOrderDesc': 'Instant chat via WhatsApp',
     'connect.alsoAvailable': 'Also Available At',
     'connect.availableAt': 'Find our products at these retail partners across Bali',
+    'connect.alertDevelopment': 'Our online ordering system is currently under development. Please use WhatsApp for orders in the meantime. Thank you for your patience!',
+    'connect.comingSoon': 'Coming Soon',
+    'connect.availableNow': 'Available Now',
+    'connect.devBadge': "We're working hard to bring you the best online ordering experience!",
+    'connect.devNoticeTitle': "We're currently enhancing our online ordering system",
+    'connect.devNoticeDesc': "For the best ordering experience, please use WhatsApp. We'll notify you when online ordering is available!",
 
     // Order Form
     'order.title': 'Pre-Order Checkout',
@@ -439,6 +445,12 @@ const translations = {
     'connect.directOrderDesc': 'Chat instan via WhatsApp',
     'connect.alsoAvailable': 'Juga Tersedia Di',
     'connect.availableAt': 'Temukan produk kami di mitra retail ini di seluruh Bali',
+    'connect.alertDevelopment': 'Sistem pemesanan online kami sedang dalam pengembangan. Silakan gunakan WhatsApp untuk memesan sementara waktu. Terima kasih atas kesabaran Anda!',
+    'connect.comingSoon': 'Segera Hadir',
+    'connect.availableNow': 'Tersedia Sekarang',
+    'connect.devBadge': "Kami sedang bekerja keras untuk menghadirkan pengalaman pemesanan online terbaik!",
+    'connect.devNoticeTitle': "Sistem pemesanan online kami sedang dalam pengembangan",
+    'connect.devNoticeDesc': "Untuk pengalaman pemesanan terbaik, silakan gunakan WhatsApp. Kami akan memberi tahu Anda saat pemesanan online tersedia!",
     
     // Order Form
     'order.title': 'Checkout Pre-Order',
