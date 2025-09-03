@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { OrderStatus } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import crypto from 'crypto';
 import { sendMailWithLog } from "@/lib/mail";
 import { ratelimit } from "@/lib/rateLimit";
@@ -27,7 +27,7 @@ const validTransitions: Record<OrderStatus, OrderStatus[]> = {
 
 export async function PATCH(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -42,6 +42,7 @@ export async function PATCH(
   }
 
   try {
+    // Await params for Next.js App Router compatibility
     const { id } = await context.params;
     const body = await request.json();
 

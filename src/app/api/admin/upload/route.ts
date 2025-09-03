@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from "@/lib/authOptions";
 import { ratelimit } from "@/lib/rateLimit";
 
 // Initialize Supabase client
@@ -49,13 +49,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     const fileName = `${Date.now()}.${fileExtension}`;
 
     // Upload the file to the 'product-images' bucket
-    const { data, error: uploadError } = await supabase.storage
+    await supabase.storage
       .from('product-images')
       .upload(fileName, file);
-
-    if (uploadError) {
-      throw new Error(`Supabase upload error: ${uploadError.message}`);
-    }
 
     // Get the public URL of the uploaded file
     const { data: publicUrlData } = supabase.storage
@@ -69,8 +65,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     // Return the public URL to the frontend
     return NextResponse.json({ url: publicUrlData.publicUrl });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : 'Failed to upload file';
     console.error("Upload Error:", error);
-    return NextResponse.json({ error: error.message || 'Failed to upload file' }, { status: 500 });
+    return NextResponse.json({ error: errMsg }, { status: 500 });
   }
 }

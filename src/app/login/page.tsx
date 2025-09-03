@@ -50,7 +50,7 @@ export default function LoginPage() {
       } else {
         router.push("/admin/orders");
       }
-    } catch (error) {
+    } catch {
       setGeneralError("An unexpected error occurred.");
     } finally {
       setIsLoading(false);

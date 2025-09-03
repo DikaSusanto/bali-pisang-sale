@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport({
 });
 
 const MAX_EMAILS_PER_HOUR = 5;
-const MAX_RETRIES = 3;
 
 export async function sendMailWithLog({
   to,
@@ -64,10 +63,11 @@ export async function sendMailWithLog({
       data: { status: 'SENT', retryCount: log.retryCount + 1 },
     });
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
     await prisma.emailLog.update({
       where: { id: log.id },
-      data: { status: 'FAILED', error: error.message, retryCount: log.retryCount + 1 },
+      data: { status: 'FAILED', error: errorMsg, retryCount: log.retryCount + 1 },
     });
     throw error;
   }

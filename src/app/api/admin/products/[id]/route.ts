@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { ratelimit } from "@/lib/rateLimit";
 import { z } from "zod";
 
@@ -36,7 +36,7 @@ export async function DELETE(
       where: { id },
     });
     return NextResponse.json({ message: "Product deleted successfully" }, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
   }
 }
@@ -79,7 +79,7 @@ export async function PUT(
     });
 
     return NextResponse.json(updatedProduct);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
   }
 }

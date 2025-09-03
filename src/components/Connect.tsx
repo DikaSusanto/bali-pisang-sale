@@ -62,7 +62,7 @@ export default function Connect() {
   const duplicatedPartners = [...partners, ...partners];
 
   // Component to handle logo with fallback - bigger size, no frame
-  const PartnerLogo = ({ partner, index }: { partner: typeof partners[0], index: number }) => {
+  const PartnerLogo = ({ partner }: { partner: typeof partners[0] }) => {
     const [imageError, setImageError] = useState(false);
     
     if (imageError) {
@@ -226,8 +226,7 @@ export default function Connect() {
                   {/* Partner Card */}
                   <div className="bg-transparent p-4 min-w-[180px]">
                     {/* Logo */}
-                    <PartnerLogo partner={partner} index={index} />
-                    
+                    <PartnerLogo partner={partner} />
                     <h5 className="font-semibold text-gray-800 text-base mb-1">
                       {partner.name}
                     </h5>

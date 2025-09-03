@@ -6,6 +6,22 @@ import { Order, OrderItem, OrderStatus } from "@prisma/client";
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+declare global {
+  interface Window {
+    snap?: {
+      pay: (
+        token: string,
+        callbacks: {
+          onSuccess?: () => void;
+          onPending?: () => void;
+          onError?: () => void;
+          onClose?: () => void;
+        }
+      ) => void;
+    };
+  }
+}
+
 type OrderWithItems = Order & {
   items: OrderItem[];
 };
@@ -30,7 +46,7 @@ export default function OrderStatusUI({ order }: OrderStatusUIProps) {
 
   // Ensure Snap script is loaded
   useEffect(() => {
-    if (!(window as any).snap) {
+    if (!window.snap) {
       const script = document.createElement("script");
       script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
       script.setAttribute("data-client-key", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "");
@@ -47,7 +63,7 @@ export default function OrderStatusUI({ order }: OrderStatusUIProps) {
     setMessage(null);
     setMessageType(null);
     try {
-      if (!(window as any).snap) {
+      if (!window.snap) {
         setMessage(t('success.paymentSystemLoading') || "Payment system is still loading. Please wait a moment and try again.");
         setMessageType("info");
         setIsProcessing(false);
@@ -69,7 +85,7 @@ export default function OrderStatusUI({ order }: OrderStatusUIProps) {
       }
 
       const { token } = await response.json();
-      (window as any).snap.pay(token, {
+      window.snap?.pay(token, {
         onSuccess: function () {
           setMessage(t('success.paymentSuccessReload') || "Payment successful! Reloading status...");
           setMessageType("success");

@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { format } from "date-fns";
-import { FaTrash, FaFilter, FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaTrash, FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 interface OrdersApiResponse {
   orders: Order[];
@@ -59,7 +59,6 @@ export default function OrdersClientPage({
   const [filterEndDate, setFilterEndDate] = useState<string>(searchParams.get("endDate") || "");
 
   const [isDeleteModalOpen, setIsDeleteModal] = useState(false);
-  const [orderToDeleteId, setOrderToDeleteId] = useState<string | null>(null);
   const [ordersToDelete, setOrdersToDelete] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [pageMessage, setPageMessage] = useState<{ text: string, type: 'info' | 'error' | 'success' } | null>(null);
@@ -110,31 +109,15 @@ export default function OrdersClientPage({
       setSelectedOrderIds(prev =>
         prev.filter(id => data.orders.some(order => order.id === id))
       );
-    } catch (err: any) {
-      console.error(err.message);
-      setError(err.message);
-      setPageMessage({ text: `Failed to load orders: ${err.message}`, type: 'error' });
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      console.error(errorMsg);
+      setError(errorMsg);
+      setPageMessage({ text: `Failed to load orders: ${errorMsg}`, type: 'error' });
     } finally {
       setIsRefreshing(false);
     }
   }, [filterStatus, filterStartDate, filterEndDate, currentPage, itemsPerPage, router]);
-
-  // Define the missing applyFilters function
-  const applyFilters = () => {
-    // Reset to page 1 whenever filters are applied
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", "1");
-    if (filterStatus) params.set("status", filterStatus);
-    if (filterStartDate) params.set("startDate", filterStartDate);
-    if (filterEndDate) params.set("endDate", filterEndDate);
-
-    // Remove empty filter params to keep the URL clean
-    if (filterStatus === "ALL") params.delete("status");
-    if (!filterStartDate) params.delete("startDate");
-    if (!filterEndDate) params.delete("endDate");
-
-    router.push(`?${params.toString()}`);
-  };
 
   useEffect(() => {
     if (!isLoading) {
@@ -180,7 +163,6 @@ export default function OrdersClientPage({
   const triggerDelete = (ids: string | string[]) => {
     const idsToDelete = Array.isArray(ids) ? ids : [ids];
     setOrdersToDelete(idsToDelete);
-    setOrderToDeleteId(Array.isArray(ids) ? null : ids[0]);
     setIsDeleteModal(true);
   };
 
@@ -204,20 +186,18 @@ export default function OrdersClientPage({
 
       fetchOrders();
       setPageMessage({ text: `Successfully deleted ${ordersToDelete.length} order(s)!`, type: 'success' });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Delete order error:", err);
-      setPageMessage({ text: `Error deleting order(s): ${err.message}`, type: 'error' });
+      setPageMessage({ text: `Error deleting order(s): ${err instanceof Error ? err.message : String(err)}`, type: 'error' });
     } finally {
       setIsDeleting(false);
       setOrdersToDelete([]);
-      setOrderToDeleteId(null);
     }
   };
 
   const cancelDelete = () => {
     setIsDeleteModal(false);
     setOrdersToDelete([]);
-    setOrderToDeleteId(null);
   };
 
   if (error) return <p className="text-center text-red-500 p-8">Error: {error}</p>;
@@ -228,7 +208,7 @@ export default function OrdersClientPage({
   const pageNumbers: number[] = [];
   const maxPagesToShow = 5;
   let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-  let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+  const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
   if (endPage - startPage + 1 < maxPagesToShow) {
     startPage = Math.max(1, endPage - maxPagesToShow + 1);

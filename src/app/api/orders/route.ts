@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { OrderStatus } from "@prisma/client";
 import { ratelimit } from "@/lib/rateLimit";
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const skip = (page - 1) * pageSize; // Calculate how many records to skip
   const take = pageSize; // Calculate how many records to take
 
-  const where: any = {}; // Use 'any' for the conditional 'where' clause
+  const where: Record<string, unknown> = {};
 
   if (status && status !== "ALL") {
     // Ensure the status from query string matches a valid OrderStatus enum member

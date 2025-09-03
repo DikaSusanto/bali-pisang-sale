@@ -96,14 +96,17 @@ export async function POST(request: Request) {
     const transaction = await snap.createTransaction(parameter);
     return NextResponse.json({ token: transaction.token });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API Error:", error);
-    if (error.ApiResponse && error.ApiResponse.error_messages) {
-      console.error("Midtrans Error:", error.ApiResponse.error_messages);
-      return NextResponse.json(
-        { error: error.ApiResponse.error_messages.join(', ') },
-        { status: 400 }
-      );
+    if (typeof error === "object" && error !== null && "ApiResponse" in error) {
+      const apiError = error as { ApiResponse?: { error_messages?: string[] } };
+      if (apiError.ApiResponse && apiError.ApiResponse.error_messages) {
+        console.error("Midtrans Error:", apiError.ApiResponse.error_messages);
+        return NextResponse.json(
+          { error: apiError.ApiResponse.error_messages.join(', ') },
+          { status: 400 }
+        );
+      }
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

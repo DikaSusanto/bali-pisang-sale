@@ -1,7 +1,7 @@
 // app/admin/orders/page.tsx
 
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import OrdersClientPage from "./OrdersClientPage";
@@ -12,17 +12,6 @@ export const metadata: Metadata = {
   title: 'Admin Orders | Bali Pisang Sale',
   description: 'View and manage all orders in the admin panel.',
 };
-
-// Define the expected search parameters from the URL, including pagination
-interface AdminOrdersPageProps {
-  searchParams: {
-    status?: string;
-    startDate?: string;
-    endDate?: string;
-    page?: string; // New: for current page
-    pageSize?: string; // New: for items per page
-  };
-}
 
 export default async function AdminOrdersPage({
   searchParams,
@@ -47,7 +36,7 @@ export default async function AdminOrdersPage({
   const skip = (currentPage - 1) * itemsPerPage;
   const take = itemsPerPage;
 
-  const whereClause: any = {};
+  const whereClause: Record<string, unknown> = {};
 
   if (status && status !== "ALL") {
     if (Object.values(OrderStatus).includes(status as OrderStatus)) {
@@ -67,7 +56,6 @@ export default async function AdminOrdersPage({
   }
 
   try {
-    // Fetch orders with applied filters and pagination
     const orders = await prisma.order.findMany({
       where: whereClause,
       orderBy: {
@@ -77,12 +65,10 @@ export default async function AdminOrdersPage({
       take: take,
     });
 
-    // Get the total count of orders matching the filters (without pagination)
     const totalOrdersCount = await prisma.order.count({
       where: whereClause,
     });
 
-    // Pass all necessary data to the client component
     return (
       <OrdersClientPage
         initialOrders={orders}

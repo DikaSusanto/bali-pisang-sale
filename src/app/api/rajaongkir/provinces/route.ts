@@ -24,13 +24,14 @@ export async function GET(request: Request) {
   if (!success) return NextResponse.json({ error: "Rate limit exceeded." }, { status: 429 });
 
   try {
-    const provinces = await komerceGetFetch('/destination/province');
-    const formattedProvinces = provinces.map((prov: any) => ({
+    const provinces: Array<{ id: string; name: string }> = await komerceGetFetch('/destination/province');
+    const formattedProvinces = provinces.map((prov) => ({
       id: prov.id,
       name: prov.name,
     }));
     return NextResponse.json(formattedProvinces);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }

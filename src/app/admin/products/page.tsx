@@ -1,7 +1,7 @@
 // app/admin/products/page.tsx
 
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import ProductsClientPage from "./ProductsClientPage";
@@ -25,7 +25,6 @@ export default async function ProductsPage({
   const page = parseInt(params.page || "1", 10);
   const pageSize = parseInt(params.pageSize || "10", 10);
 
-  // Direct database query from the Server Component
   try {
     const skip = (page - 1) * pageSize;
     const take = pageSize;
@@ -37,7 +36,6 @@ export default async function ProductsPage({
     });
     const totalProductsCount = await prisma.product.count();
 
-    // Pass the fetched data directly as props
     return (
       <ProductsClientPage
         initialProducts={products}

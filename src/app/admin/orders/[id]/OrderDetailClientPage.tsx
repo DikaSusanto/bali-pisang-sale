@@ -108,8 +108,8 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
       const updatedOrderData = await response.json();
       setOrder(updatedOrderData);
       setFinalShippingCost("");
-    } catch (error: any) {
-      setShippingCostError(error.message || "Failed to finalize order.");
+    } catch (error: unknown) {
+      setShippingCostError(error instanceof Error ? error.message : String(error) || "Failed to finalize order.");
     } finally {
       setIsFinalizing(false);
     }
@@ -131,8 +131,8 @@ export default function OrderDetailClientPage({ initialOrder }: OrderDetailClien
       }
       const updatedOrder = await response.json();
       setOrder(updatedOrder);
-    } catch (error: any) {
-      setGeneralError(error.message);
+    } catch (error: unknown) {
+      setGeneralError(error instanceof Error ? error.message : String(error));
     } finally {
       setIsCancelling(false);
     }

@@ -1,9 +1,8 @@
 "use client";
 
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from 'next/image';
-import Link from 'next/link';
-import { HiShoppingCart, HiStar } from 'react-icons/hi';
+import { HiShoppingCart } from 'react-icons/hi';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -108,7 +107,7 @@ export default function Menu() {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-        {menuItems.map((item, index) => (
+        {menuItems.map((item) => (
           <motion.div
             key={item.id}
             variants={cardVariant}

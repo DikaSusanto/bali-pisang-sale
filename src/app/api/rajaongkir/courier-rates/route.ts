@@ -5,10 +5,13 @@ import { z } from "zod";
 const KOMERCE_BASE_URL = "https://api.collaborator.komerce.id";
 const KOMERCE_API_KEY = process.env.KOMERCE_API_KEY;
 
-async function komercePostFetch<T>(endpoint: string, payload: any): Promise<T[]> {
+async function komercePostFetch<T>(endpoint: string, payload: Record<string, string | number>): Promise<T[]> {
   if (!KOMERCE_API_KEY) throw new Error("Missing Komerce API key.");
   const fullUrl = `${KOMERCE_BASE_URL}/tariff/api/v1${endpoint}`;
-  const formBody = new URLSearchParams(payload).toString();
+  const stringPayload: Record<string, string> = Object.fromEntries(
+    Object.entries(payload).map(([k, v]) => [k, String(v)])
+  );
+  const formBody = new URLSearchParams(stringPayload).toString();
   const response = await fetch(fullUrl, {
     method: 'POST',
     headers: { 'key': KOMERCE_API_KEY, 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -19,7 +22,7 @@ async function komercePostFetch<T>(endpoint: string, payload: any): Promise<T[]>
     const data = JSON.parse(text);
     if (!response.ok || data.meta?.code !== 200) throw new Error(data.meta?.message || "API error");
     return data.data || [];
-  } catch (err) {
+  } catch {
     throw new Error("Failed to parse Komerce API response");
   }
 }
@@ -57,18 +60,18 @@ export async function POST(request: Request) {
         courier: courier,
         price: 'lowest'
       };
-      const courierResults = await komercePostFetch<any>('/calculate/district/domestic-cost', payload);
+      const courierResults: Array<{ service: string; cost: number }> = await komercePostFetch('/calculate/district/domestic-cost', payload);
 
       // Prefer REG service
       const regService = courierResults.find(
-        (service: any) => service.service === "REG" && typeof service.cost === "number" && service.cost > 0
+        (service) => service.service === "REG" && typeof service.cost === "number" && service.cost > 0
       );
       if (regService) regPrice = regService.cost;
 
       // Find the cheapest service
       const costs = courierResults
-        .filter((service: any) => typeof service.cost === "number" && service.cost > 0)
-        .map((service: any) => service.cost);
+        .filter((service) => typeof service.cost === "number" && service.cost > 0)
+        .map((service) => service.cost);
 
       if (costs.length > 0) {
         const minCost = Math.min(...costs);
@@ -78,9 +81,10 @@ export async function POST(request: Request) {
       }
     }
 
-    let estimatedPrice = regPrice ?? cheapestPrice ?? 15000;
+    const estimatedPrice = regPrice ?? cheapestPrice ?? 15000;
     return NextResponse.json({ estimatedPrice });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "API error";
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }

@@ -73,8 +73,9 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, productToE
 
       const result = await response.json();
       setProduct(prev => ({ ...prev, image: result.url }));
-    } catch (err: any) {
-      setError(err.message || "Image upload failed.");
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Image upload failed.";
+      setError(errorMsg);
     } finally {
       setIsUploading(false);
     }
@@ -97,8 +98,9 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, productToE
     try {
       await onSubmit(product);
       onClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "An error occurred.";
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }

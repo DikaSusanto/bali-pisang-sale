@@ -95,9 +95,9 @@ export default function EmailLogClientPage({
       setSelectedLogIds(prev =>
         prev.filter(id => data.logs.some(log => log.id === id))
       );
-    } catch (err: any) {
-      setError(err.message);
-      setPageMessage({ text: `Failed to load email logs: ${err.message}`, type: 'error' });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+      setPageMessage({ text: `Failed to load email logs: ${err instanceof Error ? err.message : String(err)}`, type: 'error' });
     } finally {
       setIsRefreshing(false);
     }
@@ -166,8 +166,8 @@ export default function EmailLogClientPage({
       fetchLogs();
       setPageMessage({ text: `Successfully deleted ${logsToDelete.length} log(s)!`, type: 'success' });
       setSelectedLogIds([]);
-    } catch (err: any) {
-      setPageMessage({ text: `Error deleting log(s): ${err.message}`, type: 'error' });
+    } catch (err: unknown) {
+      setPageMessage({ text: `Error deleting log(s): ${err instanceof Error ? err.message : String(err)}`, type: 'error' });
     } finally {
       setIsDeleting(false);
       setLogsToDelete([]);
@@ -192,8 +192,8 @@ export default function EmailLogClientPage({
       }
       setPageMessage({ text: "Status updated successfully.", type: "success" });
       fetchLogs();
-    } catch (err: any) {
-      setPageMessage({ text: `Error updating status: ${err.message}`, type: 'error' });
+    } catch (err: unknown) {
+      setPageMessage({ text: `Error updating status: ${err instanceof Error ? err.message : String(err)}`, type: 'error' });
     }
   };
 
@@ -209,7 +209,7 @@ export default function EmailLogClientPage({
   const pageNumbers: number[] = [];
   const maxPagesToShow = 5;
   let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-  let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+  const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
   if (endPage - startPage + 1 < maxPagesToShow) {
     startPage = Math.max(1, endPage - maxPagesToShow + 1);

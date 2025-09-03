@@ -27,7 +27,7 @@ export async function GET(request: Request) {
         orderId: email.orderId || undefined,
       });
       retried++;
-    } catch (err) {
+    } catch {
       // Already logged in sendMailWithLog
     }
   }

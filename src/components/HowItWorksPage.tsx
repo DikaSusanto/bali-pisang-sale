@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { HiArrowLeft, HiCube, HiMail, HiTruck, HiCheckCircle, HiClock, HiShieldCheck, HiCreditCard } from 'react-icons/hi';

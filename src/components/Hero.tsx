@@ -63,7 +63,6 @@ const badgeVariant = {
 };
 
 export default function Hero() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const { t } = useLanguage();
 
@@ -76,7 +75,6 @@ export default function Hero() {
 
   // Spring animations for smooth mouse following
   const springConfig = { stiffness: 150, damping: 15 };
-  const x = useSpring(mouseX, springConfig);
   const y = useSpring(mouseY, springConfig);
 
   useEffect(() => {
@@ -84,7 +82,6 @@ export default function Hero() {
       const { clientX, clientY } = e;
       const { innerWidth, innerHeight } = window;
 
-      setMousePosition({ x: clientX, y: clientY });
       mouseX.set(clientX - innerWidth / 2);
       mouseY.set(clientY - innerHeight / 2);
     };
@@ -100,10 +97,18 @@ export default function Hero() {
     }
   };
 
+  // Define badges outside render
   const badges = [
     { icon: <HiStar />, text: t('hero.badge1'), position: "top-16 right-20" },
     { icon: <HiHeart />, text: t('hero.badge2'), position: "bottom-32 left-12" },
     { icon: <HiLocationMarker />, text: t('hero.badge3'), position: "top-32 left-16" },
+  ];
+
+  // Move useTransform hooks outside render loop
+  const badgeYTransforms = [
+    useTransform(y, [0, 300], [0, -10]),
+    useTransform(y, [0, 300], [0, 10]),
+    useTransform(y, [0, 300], [0, -10]),
   ];
 
   return (
@@ -278,7 +283,7 @@ export default function Hero() {
               variants={floatingVariant}
               className={`absolute ${badge.position} hidden lg:flex items-center gap-2 bg-white/90 backdrop-blur-sm shadow-lg rounded-full px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200/50`}
               style={{
-                y: useTransform(y, [0, 300], [0, index % 2 === 0 ? -10 : 10]),
+                y: badgeYTransforms[index],
               }}
               whileHover={{ scale: 1.1, rotate: 5 }}
             >

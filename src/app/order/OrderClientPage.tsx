@@ -273,8 +273,8 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
                 throw new Error(data.error || "Failed to get shipping options.");
             }
             setEstimatedShippingCost(data.estimatedPrice);
-        } catch (error: any) {
-            setShippingError(error.message || "Failed to get shipping options.");
+        } catch (error: unknown) {
+            setShippingError(error instanceof Error ? error.message : String(error) || "Failed to get shipping options.");
         } finally {
             setIsCalculatingShipping(false);
         }
@@ -331,8 +331,8 @@ export default function OrderClientPage({ products }: OrderClientPageProps) {
             }
             const data = await response.json();
             router.push(`/order/pre-order-success/${data.id}`);
-        } catch (error: any) {
-            setOrderError(error.message || "Failed to place your pre-order. Please try again.");
+        } catch (error: unknown) {
+            setOrderError(error instanceof Error ? error.message : String(error) || "Failed to place your pre-order. Please try again.");
         } finally {
             setIsLoading(false);
         }

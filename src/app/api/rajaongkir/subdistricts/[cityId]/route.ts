@@ -17,26 +17,30 @@ async function komerceGetFetch(endpoint: string) {
   return data.data;
 }
 
-export async function GET(request: Request, { params }: { params: { cityId: string } }) {
+export async function GET(request: Request, context: { params: Promise<{ cityId: string }> }) {
   const ip = request.headers.get("x-forwarded-for") || "anonymous";
   const { success } = await ratelimit.limit(ip);
   if (!success) return NextResponse.json({ error: "Rate limit exceeded." }, { status: 429 });
 
+  // Await params for Next.js App Router compatibility
+  const { cityId } = await context.params;
+
   // Validate cityId
   const schema = z.object({ cityId: z.string().min(1) });
-  const parseResult = schema.safeParse(params);
+  const parseResult = schema.safeParse({ cityId });
   if (!parseResult.success) {
     return NextResponse.json({ error: "Invalid cityId" }, { status: 400 });
   }
 
   try {
-    const subdistricts = await komerceGetFetch(`/destination/district/${params.cityId}`);
-    const formattedSubdistricts = subdistricts.map((sd: any) => ({
+    const subdistricts: Array<{ id: string; name: string }> = await komerceGetFetch(`/destination/district/${cityId}`);
+    const formattedSubdistricts = subdistricts.map((sd) => ({
       id: sd.id,
       name: sd.name,
     }));
     return NextResponse.json(formattedSubdistricts);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }

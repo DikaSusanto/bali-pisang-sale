@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import prisma from "@/lib/prisma";
 import EmailLogClientPage from "./EmailLogClientPage";
 import { redirect } from "next/navigation";
@@ -23,7 +23,6 @@ export default async function EmailLogDashboard({
   const page = parseInt(params.page || "1", 10);
   const pageSize = parseInt(params.pageSize || "10", 10);
 
-  // Initial fetch for SSR hydration
   const logs = await prisma.emailLog.findMany({
     orderBy: { createdAt: "desc" },
     skip: (page - 1) * pageSize,

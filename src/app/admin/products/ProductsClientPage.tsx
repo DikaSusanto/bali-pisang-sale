@@ -24,6 +24,8 @@ interface ProductsClientPageProps {
   pageSize: number;
 }
 
+type ProductFormData = Omit<Product, "id" | "price"> & { price: string };
+
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
 
@@ -51,7 +53,7 @@ export default function ProductsClientPage({
   const pageNumbers: number[] = [];
   const maxPagesToShow = 5;
   let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-  let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+  const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
   if (endPage - startPage + 1 < maxPagesToShow) {
     startPage = Math.max(1, endPage - maxPagesToShow + 1);
   }
@@ -73,7 +75,7 @@ export default function ProductsClientPage({
       setTotalProductsCount(data.totalProductsCount);
       setCurrentPage(data.currentPage);
       setItemsPerPage(data.pageSize);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching products:", error);
     }
   }, [currentPage, itemsPerPage]);
@@ -98,7 +100,7 @@ export default function ProductsClientPage({
     router.push(`?${params.toString()}`);
   };
 
-  const handleAddProduct = async (productData: any) => {
+  const handleAddProduct = async (productData: ProductFormData) => {
     setGeneralError(null);
     const payload = { ...productData, price: Number(productData.price) };
     try {
@@ -115,12 +117,12 @@ export default function ProductsClientPage({
       setGeneralError("Product added successfully.");
       fetchProducts();
       setIsAddModalOpen(false);
-    } catch (error: any) {
-      setGeneralError(error.message || "Failed to add product.");
+    } catch (error: unknown) {
+      setGeneralError(error instanceof Error ? error.message : String(error) || "Failed to add product.");
     }
   };
 
-  const handleUpdateProduct = async (productData: any) => {
+  const handleUpdateProduct = async (productData: ProductFormData) => {
     setGeneralError(null);
     if (!productToEdit) return;
     const payload = { ...productData, price: Number(productData.price) };
@@ -138,8 +140,8 @@ export default function ProductsClientPage({
       setGeneralError("Product updated successfully.");
       fetchProducts();
       setProductToEdit(null);
-    } catch (error: any) {
-      setGeneralError(error.message || "Failed to update product.");
+    } catch (error: unknown) {
+      setGeneralError(error instanceof Error ? error.message : String(error) || "Failed to update product.");
     }
   };
 
@@ -159,8 +161,8 @@ export default function ProductsClientPage({
       setGeneralError("Product deleted successfully."); // Show success
       fetchProducts();
       setProductToDelete(null);
-    } catch (error: any) {
-      setGeneralError(error.message || "Failed to delete product.");
+    } catch (error: unknown) {
+      setGeneralError(error instanceof Error ? error.message : String(error) || "Failed to delete product.");
       setProductToDelete(null);
     }
   };

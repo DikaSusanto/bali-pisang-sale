@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { EmailStatus } from "@prisma/client";
 import { ratelimit } from "@/lib/rateLimit";
 
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   const skip = (page - 1) * pageSize;
   const take = pageSize;
 
-  const where: any = {};
+  const where: Record<string, unknown> = {};
 
   if (status && Object.values(EmailStatus).includes(status as EmailStatus)) {
     where.status = status as EmailStatus;
@@ -51,8 +51,8 @@ export async function GET(req: NextRequest) {
       currentPage: page,
       pageSize,
     });
-  } catch (error) {
-    console.error("Error fetching email logs:", error);
+  } catch {
+    console.error("Error fetching email logs:");
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -84,7 +84,7 @@ export async function PATCH(req: NextRequest) {
       data: { status },
     });
     return NextResponse.json(updatedLog);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to update status" }, { status: 500 });
   }
 }
@@ -112,7 +112,7 @@ export async function DELETE(req: NextRequest) {
       where: { id: { in: ids } },
     });
     return NextResponse.json({ deleted: result.count });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to delete logs" }, { status: 500 });
   }
 }
