@@ -1,0 +1,6 @@
+# public/robots.txt
+
+User-agent: *
+Allow: /
+
+Sitemap: https://bali-pisang-sale.vercel.app/sitemap.xml
